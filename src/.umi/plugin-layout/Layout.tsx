@@ -128,26 +128,20 @@ export default (props: any) => {
       menu={{ locale: userConfig.locale }}
       logo={Logo}
       menuItemRender={(menuItemProps, defaultDom) => {
-        if (menuItemProps.isUrl || menuItemProps.children) {
-          return <div className='ant-pro-base-menu-inline-item-title' >
-            {menuItemProps.pro_layout_parentKeys
-              && menuItemProps.pro_layout_parentKeys.length > 0 &&
-              menuItemProps.icon}
-            {defaultDom}
-          </div>;
-        }
         if (menuItemProps.path && location.pathname !== menuItemProps.path) {
           return (
             // handle wildcard route path, for example /slave/* from qiankun
             <Link to={menuItemProps.path.replace('/*', '')} target={menuItemProps.target}>
-              {menuItemProps.pro_layout_parentKeys
-                && menuItemProps.pro_layout_parentKeys.length > 0 &&
-                menuItemProps.icon}
-              {defaultDom}
+              <div className='ant-pro-base-menu-inline-item-title'>
+                {menuItemProps.pro_layout_parentKeys
+                  && menuItemProps.pro_layout_parentKeys.length > 0 &&
+                  menuItemProps.icon}
+                {defaultDom}
+              </div>
             </Link>
           );
         }
-        return <div className='ant-pro-base-menu-inline-item-title' >
+        return <div className='ant-pro-base-menu-inline-item-title'>
           {menuItemProps.pro_layout_parentKeys
             && menuItemProps.pro_layout_parentKeys.length > 0 &&
             menuItemProps.icon}
