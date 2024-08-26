@@ -66,10 +66,40 @@ export default [
     icon: 'setting',
     routes: [
       {
+        path: 'jsyq/list',
+        name: '计算引擎',
+        icon: '',
+        component: './dev',
+      },
+      {
+        path: 'sjcc/list',
+        name: '数据存储',
+        icon: '',
+        component: './dev',
+      },
+      {
+        path: 'xtrz/list',
+        name: '系统日志',
+        icon: '',
+        component: './dev',
+      },
+      {
         path: 'roles/list',
         name: '角色管理',
-        icon: 'setting',
+        icon: 'user',
         component: './roles/list',
+      },
+      {
+        path: 'zdgl/list',
+        name: '字典管理',
+        icon: '',
+        component: './dev',
+      },
+      {
+        path: 'yhgl/list',
+        name: '用户管理',
+        icon: '',
+        component: './dev',
       },
     ],
   },

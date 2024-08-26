@@ -4,7 +4,7 @@
 import React from 'react';
 
 export async function getRoutes() {
-  const routes = {"1":{"path":"/user","layout":false,"id":"1"},"2":{"name":"login","path":"/user/login","parentId":"1","id":"2"},"3":{"path":"/welcome","name":"welcome","icon":"smile","parentId":"ant-design-pro-layout","id":"3"},"4":{"path":"/admin","name":"admin","icon":"crown","access":"canAdmin","parentId":"ant-design-pro-layout","id":"4"},"5":{"path":"/admin","redirect":"/admin/sub-page","parentId":"4","id":"5"},"6":{"path":"/admin/sub-page","name":"sub-page","parentId":"4","id":"6"},"7":{"name":"list.table-list","icon":"table","path":"/list","parentId":"ant-design-pro-layout","id":"7"},"8":{"path":"/","redirect":"/welcome","parentId":"ant-design-pro-layout","id":"8"},"9":{"path":"*","layout":false,"id":"9"},"10":{"path":"/xtgl","name":"系统管理","icon":"setting","parentId":"ant-design-pro-layout","id":"10"},"11":{"path":"roles/list","name":"角色管理","icon":"setting","parentId":"10","id":"11"},"ant-design-pro-layout":{"id":"ant-design-pro-layout","path":"/","isLayout":true},"umi/plugin/openapi":{"path":"/umi/plugin/openapi","id":"umi/plugin/openapi"}} as const;
+  const routes = {"1":{"path":"/user","layout":false,"id":"1"},"2":{"name":"login","path":"/user/login","parentId":"1","id":"2"},"3":{"path":"/welcome","name":"welcome","icon":"smile","parentId":"ant-design-pro-layout","id":"3"},"4":{"path":"/admin","name":"admin","icon":"crown","access":"canAdmin","parentId":"ant-design-pro-layout","id":"4"},"5":{"path":"/admin","redirect":"/admin/sub-page","parentId":"4","id":"5"},"6":{"path":"/admin/sub-page","name":"sub-page","parentId":"4","id":"6"},"7":{"name":"list.table-list","icon":"table","path":"/list","parentId":"ant-design-pro-layout","id":"7"},"8":{"path":"/","redirect":"/welcome","parentId":"ant-design-pro-layout","id":"8"},"9":{"path":"*","layout":false,"id":"9"},"10":{"path":"/xtgl","name":"系统管理","icon":"setting","parentId":"ant-design-pro-layout","id":"10"},"11":{"path":"jsyq/list","name":"计算引擎","icon":"","parentId":"10","id":"11"},"12":{"path":"sjcc/list","name":"数据存储","icon":"","parentId":"10","id":"12"},"13":{"path":"xtrz/list","name":"系统日志","icon":"","parentId":"10","id":"13"},"14":{"path":"roles/list","name":"角色管理","icon":"user","parentId":"10","id":"14"},"15":{"path":"zdgl/list","name":"字典管理","icon":"","parentId":"10","id":"15"},"16":{"path":"yhgl/list","name":"用户管理","icon":"","parentId":"10","id":"16"},"ant-design-pro-layout":{"id":"ant-design-pro-layout","path":"/","isLayout":true},"umi/plugin/openapi":{"path":"/umi/plugin/openapi","id":"umi/plugin/openapi"}} as const;
   return {
     routes,
     routeComponents: {
@@ -18,7 +18,12 @@ export async function getRoutes() {
 '8': React.lazy(() => import('./EmptyRoute')),
 '9': React.lazy(() => import(/* webpackChunkName: "p__404" */'@/pages/404.tsx')),
 '10': React.lazy(() => import('./EmptyRoute')),
-'11': React.lazy(() => import(/* webpackChunkName: "p__roles__list" */'@/pages/roles/list.tsx')),
+'11': React.lazy(() => import(/* webpackChunkName: "p__dev__index" */'@/pages/dev/index.tsx')),
+'12': React.lazy(() => import(/* webpackChunkName: "p__dev__index" */'@/pages/dev/index.tsx')),
+'13': React.lazy(() => import(/* webpackChunkName: "p__dev__index" */'@/pages/dev/index.tsx')),
+'14': React.lazy(() => import(/* webpackChunkName: "p__roles__list" */'@/pages/roles/list.tsx')),
+'15': React.lazy(() => import(/* webpackChunkName: "p__dev__index" */'@/pages/dev/index.tsx')),
+'16': React.lazy(() => import(/* webpackChunkName: "p__dev__index" */'@/pages/dev/index.tsx')),
 'ant-design-pro-layout': React.lazy(() => import(/* webpackChunkName: "umi__plugin-layout__Layout" */'/Users/dwx/Desktop/workspace/gistack/data_scalpel3/src/.umi/plugin-layout/Layout.tsx')),
 'umi/plugin/openapi': React.lazy(() => import(/* webpackChunkName: "umi__plugin-openapi__openapi" */'/Users/dwx/Desktop/workspace/gistack/data_scalpel3/src/.umi/plugin-openapi/openapi.tsx')),
 },
