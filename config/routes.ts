@@ -60,4 +60,18 @@ export default [
     layout: false,
     component: './404',
   },
+  {
+    path: '/xtgl',
+    name: '系统管理',
+    icon: 'setting',
+    routes: [
+      {
+        path: 'roles/list',
+        name: '角色管理',
+        icon: 'setting',
+        component: './roles/list',
+      },
+    ],
+  },
+
 ];
