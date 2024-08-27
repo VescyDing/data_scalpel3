@@ -46,6 +46,7 @@ const roles = {
   delete: async (data: { [key: string]: any }) => {
     return request(`${baseUrl}/roles/${data.id}`, {
       method: 'DELETE',
+      data
     });
   },
 }
@@ -60,7 +61,54 @@ const dict = {
   },
 }
 
+const users = {
+  get: async (
+    data?: { [key: string]: any },
+  ) => {
+    return listTransOut(await request(`${baseUrl}/users?${(new URLSearchParams(listTransIn(data ?? {}))).toString()}`, {
+      method: 'GET',
+    }));
+  },
+  put: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/users/${data.id}`, {
+      method: 'PUT',
+      data
+    });
+  },
+  post: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/users`, {
+      method: 'POST',
+      data
+    });
+  },
+  delete: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/users/${data.id}`, {
+      method: 'DELETE',
+      data
+    });
+  },
+  enable: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/users/${data.id}/actions/enable`, {
+      method: 'POST',
+      data
+    });
+  },
+  disable: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/users/${data.id}/actions/disable`, {
+      method: 'POST',
+      data
+    });
+  },
+  changePassword: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/users/${data.id}/actions/change-password`, {
+      method: 'POST',
+      data
+    });
+  },
+}
+
 export {
   roles,
   dict,
+  users,
 }

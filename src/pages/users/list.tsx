@@ -1,5 +1,5 @@
-import { roles, dict } from '@/services/ant-design-pro/api_v1';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { users, dict } from '@/services/ant-design-pro/api_v1';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, MinusCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
@@ -24,7 +24,7 @@ import _ from 'lodash'
 const handleAdd = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在添加');
   try {
-    await roles.post(fields);
+    await users.post(fields);
     hide();
     message.success('添加成功');
     return true;
@@ -44,7 +44,7 @@ const handleAdd = async (fields: API.RuleListItem) => {
 const handleUpdate = async (fields: FormValueType) => {
   const hide = message.loading('正在更新');
   try {
-    await roles.put(fields);
+    await users.put(fields);
     hide();
     message.success('更新成功');
     return true;
@@ -65,7 +65,7 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
   try {
-    const requests = selectedRows.map(({ id }) => roles.delete({ id }))
+    const requests = selectedRows.map(({ id }) => users.delete({ id }))
     await Promise.all(requests)
     hide();
     message.success('删除成功');
@@ -95,24 +95,23 @@ const TableList: React.FC = () => {
   const [currentRow, setCurrentRow] = useState<API.RuleListItem>({});
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
-  const [AuthType, _AuthType] = useState([]);
-
-
-  useEffect(() => {
-    dict.get({
-      '**type': 'AuthType',
-      current: 1,
-      pageSize: 1000,
-    }).then((res) => {
-      _AuthType(res.data as [])
-    })
-  }, [])
-
   useEffect(() => {
     if (!createModalOpen) {
       setCurrentRow({});
     }
   }, [createModalOpen])
+
+  const dict_state = {
+    'ENABLE': <Tag icon={<CheckCircleOutlined />} color="processing">
+      启用
+    </Tag>,
+    'DISABLE': <Tag icon={<MinusCircleOutlined />} color="default">
+      禁用
+    </Tag>,
+    'DELETED': <Tag icon={<ExclamationCircleOutlined />} color="error">
+      已删除
+    </Tag>
+  }
 
   /**
    * @en-US International configuration
@@ -122,7 +121,7 @@ const TableList: React.FC = () => {
 
   const columns: ProColumns<API.RuleListItem>[] = [
     {
-      title: '角色名称',
+      title: '名称',
       dataIndex: 'name',
       tip: 'The name is the unique key',
       render: (dom, entity) => {
@@ -139,10 +138,23 @@ const TableList: React.FC = () => {
       },
     },
     {
-      title: '权限',
-      dataIndex: 'permissions',
-      render: (dom: any, entity) => dom?.map?.((item: string) => <Tag key={item}>{_.find(AuthType, { value: item })?.name ?? item}</Tag>),
-      search: false,
+      title: '昵称',
+      dataIndex: 'nickName',
+    },
+    {
+      title: '手机号',
+      dataIndex: 'phone',
+    },
+    {
+      title: '邮箱',
+      dataIndex: 'email',
+    },
+    {
+      title: '状态',
+      dataIndex: '**state',
+      render: (dom, entity) => dict_state[entity.state] ?? <Tag>{entity?.state ?? '-'}</Tag>,
+      valueType: 'select',
+      valueEnum: dict_state
     },
     {
       title: '创建时间',
@@ -219,7 +231,7 @@ const TableList: React.FC = () => {
             <PlusOutlined />新建
           </Button>,
         ]}
-        request={roles.get}
+        request={users.get}
         columns={columns}
         rowSelection={{
           onChange: (_, selectedRows) => {
@@ -288,11 +300,7 @@ const TableList: React.FC = () => {
           name="name"
           label="角色名称"
         />
-        <ProFormCheckbox.Group
-          name="permissions"
-          label="权限"
-          options={_.map(AuthType, ({ name, value }) => ({ label: name, value }))}
-        />
+
       </ModalForm>
 
 

@@ -86,7 +86,7 @@ export default [
       {
         path: 'roles/list',
         name: '角色管理',
-        icon: 'user',
+        icon: 'usergroupAdd',
         component: './roles/list',
       },
       {
@@ -96,10 +96,10 @@ export default [
         component: './dev',
       },
       {
-        path: 'yhgl/list',
+        path: 'users/list',
         name: '用户管理',
-        icon: '',
-        component: './dev',
+        icon: 'user',
+        component: './users/list',
       },
     ],
   },
