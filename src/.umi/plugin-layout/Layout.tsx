@@ -28,7 +28,7 @@ const filterRoutes = (routes: IRoute[], filterFn: (route: IRoute) => boolean) =>
 
   let newRoutes = []
   for (const route of routes) {
-    const newRoute = { ...route };
+    const newRoute = {...route };
     if (filterFn(route)) {
       if (Array.isArray(newRoute.routes)) {
         newRoutes.push(...filterRoutes(newRoute.routes, filterFn))
@@ -52,7 +52,7 @@ const mapRoutes = (routes: IRoute[]) => {
   }
   return routes.map(route => {
     // 需要 copy 一份, 否则会污染原始数据
-    const newRoute = { ...route }
+    const newRoute = {...route}
     if (route.originPath) {
       newRoute.path = route.originPath
     }
@@ -80,21 +80,21 @@ export default (props: any) => {
   };
   const { initialState, loading, setInitialState } = initialInfo;
   const userConfig = {
-    "locale": true,
-    "navTheme": "light",
-    "colorPrimary": "#1890ff",
-    "layout": "mix",
-    "contentWidth": "Fluid",
-    "fixedHeader": false,
-    "fixSiderbar": true,
-    "colorWeak": false,
-    "title": "Ant Design Pro",
-    "pwa": true,
-    "logo": "https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg",
-    "iconfontUrl": "",
-    "token": {}
-  };
-  const { formatMessage } = useIntl();
+  "locale": true,
+  "navTheme": "light",
+  "colorPrimary": "#1890ff",
+  "layout": "mix",
+  "contentWidth": "Fluid",
+  "fixedHeader": false,
+  "fixSiderbar": true,
+  "colorWeak": false,
+  "title": "Ant Design Pro",
+  "pwa": true,
+  "logo": "https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg",
+  "iconfontUrl": "",
+  "token": {}
+};
+const { formatMessage } = useIntl();
   const runtimeConfig = pluginManager.applyPlugins({
     key: 'layout',
     type: 'modify',
@@ -128,25 +128,18 @@ export default (props: any) => {
       menu={{ locale: userConfig.locale }}
       logo={Logo}
       menuItemRender={(menuItemProps, defaultDom) => {
+        if (menuItemProps.isUrl || menuItemProps.children) {
+          return defaultDom;
+        }
         if (menuItemProps.path && location.pathname !== menuItemProps.path) {
           return (
             // handle wildcard route path, for example /slave/* from qiankun
             <Link to={menuItemProps.path.replace('/*', '')} target={menuItemProps.target}>
-              <div className='ant-pro-base-menu-inline-item-title'>
-                {menuItemProps.pro_layout_parentKeys
-                  && menuItemProps.pro_layout_parentKeys.length > 0 &&
-                  menuItemProps.icon}
-                {defaultDom}
-              </div>
+              {defaultDom}
             </Link>
           );
         }
-        return <div className='ant-pro-base-menu-inline-item-title'>
-          {menuItemProps.pro_layout_parentKeys
-            && menuItemProps.pro_layout_parentKeys.length > 0 &&
-            menuItemProps.icon}
-          {defaultDom}
-        </div>;
+        return defaultDom;
       }}
       itemRender={(route, _, routes) => {
         const { breadcrumbName, title, path } = route;

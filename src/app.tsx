@@ -53,6 +53,27 @@ export async function getInitialState(): Promise<{
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
+    menuItemRender: (menuItemProps, defaultDom) => {
+      if (menuItemProps.path && location.pathname !== menuItemProps.path) {
+        return (
+          // handle wildcard route path, for example /slave/* from qiankun
+          <Link to={menuItemProps.path.replace('/*', '')} target={menuItemProps.target}>
+            <div className='ant-pro-base-menu-inline-item-title'>
+              {menuItemProps.pro_layout_parentKeys
+                && menuItemProps.pro_layout_parentKeys.length > 0 &&
+                menuItemProps.icon}
+              {defaultDom}
+            </div>
+          </Link>
+        );
+      }
+      return <div className='ant-pro-base-menu-inline-item-title'>
+        {menuItemProps.pro_layout_parentKeys
+          && menuItemProps.pro_layout_parentKeys.length > 0 &&
+          menuItemProps.icon}
+        {defaultDom}
+      </div>;
+    },
     actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
@@ -94,11 +115,11 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     ],
     links: isDev
       ? [
-          <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
-            <LinkOutlined />
-            <span>OpenAPI 文档</span>
-          </Link>,
-        ]
+        <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
+          <LinkOutlined />
+          <span>OpenAPI 文档</span>
+        </Link>,
+      ]
       : [],
     menuHeaderRender: undefined,
     // 自定义 403 页面
