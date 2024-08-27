@@ -88,7 +88,7 @@ export default (props: any) => {
   "fixedHeader": false,
   "fixSiderbar": true,
   "colorWeak": false,
-  "title": "Ant Design Pro",
+  "title": "Data Scalpel",
   "pwa": true,
   "logo": "https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg",
   "iconfontUrl": "",

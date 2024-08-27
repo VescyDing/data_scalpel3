@@ -5,26 +5,21 @@ import React from 'react';
 const Footer: React.FC = () => {
   return (
     <DefaultFooter
+      copyright={`${new Date().getFullYear()}《Data Scalpel》powered by VescyDing & SuperHuang`}
       style={{
         background: 'none',
       }}
       links={[
         {
-          key: 'Ant Design Pro',
-          title: 'Ant Design Pro',
-          href: 'https://pro.ant.design',
+          key: 'Data Scalpel',
+          title: 'Data Scalpel',
+          href: 'https://github.com/VescyDing/data_scalpel3',
           blankTarget: true,
         },
         {
           key: 'github',
           title: <GithubOutlined />,
           href: 'https://github.com/ant-design/ant-design-pro',
-          blankTarget: true,
-        },
-        {
-          key: 'Ant Design',
-          title: 'Ant Design',
-          href: 'https://ant.design',
           blankTarget: true,
         },
       ]}
