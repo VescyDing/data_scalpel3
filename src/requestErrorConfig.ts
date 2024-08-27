@@ -80,7 +80,7 @@ export const errorConfig: RequestConfig = {
         message.error('None response! Please retry.');
       } else {
         // 发送请求时出了点问题
-        message.error('Request error, please retry.');
+        // message.error('Request error, please retry.');
       }
     },
   },
@@ -100,9 +100,9 @@ export const errorConfig: RequestConfig = {
     (response) => {
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
-
-      if (data?.success === false) {
-        message.error('请求失败！');
+      if (data?.code !== '200') {
+        message.error('请求失败：' + data?.message);
+        throw new Error(data);
       }
       return response;
     },
