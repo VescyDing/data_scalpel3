@@ -58,6 +58,23 @@ const dict = {
       method: 'GET',
     }));
   },
+  put: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/dict/${data.id}`, {
+      method: 'PUT',
+      data
+    });
+  },
+  post: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/dict`, {
+      method: 'POST',
+      data
+    });
+  },
+  delete: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/dict/${data.id}`, {
+      method: 'DELETE',
+    });
+  },
 }
 
 const users = {

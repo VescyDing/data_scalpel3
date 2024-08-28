@@ -1,4 +1,4 @@
-import { users, dict, roles } from '@/services/ant-design-pro/api_v1';
+import { dict } from '@/services/ant-design-pro/api_v1';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, MinusCircleOutlined, ExclamationCircleOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
@@ -25,7 +25,7 @@ import _ from 'lodash'
 const handleAdd = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在添加');
   try {
-    await users.post(fields);
+    await dict.post(fields);
     hide();
     message.success('添加成功');
     return true;
@@ -43,7 +43,7 @@ const handleAdd = async (fields: API.RuleListItem) => {
 const handleUpdate = async (fields: FormValueType) => {
   const hide = message.loading('正在更新');
   try {
-    await users.put(fields);
+    await dict.put(fields);
     hide();
     message.success('更新成功');
     return true;
@@ -62,7 +62,7 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
   try {
-    const requests = selectedRows.map(({ id }) => users.delete({ id }))
+    const requests = selectedRows.map(({ id }) => dict.delete({ id }))
     await Promise.all(requests)
     hide();
     message.success('删除成功');
@@ -90,31 +90,11 @@ const TableList: React.FC = () => {
   const [currentRow, setCurrentRow] = useState<API.RuleListItem>({});
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
-  const [rolesData, _rolesData] = useState<boolean>({});
-
   useEffect(() => {
     if (!createModalOpen) {
       setCurrentRow({});
     }
   }, [createModalOpen])
-
-  useEffect(() => {
-    roles.get({ current: 1, pageSize: 1000 }).then(res => {
-      _rolesData(_.mapValues(_.keyBy(res.data, 'id'), 'name'))
-    })
-  }, [])
-
-  const dict_state = {
-    'ENABLE': <Tag icon={<CheckCircleOutlined />} color="processing">
-      启用
-    </Tag>,
-    'DISABLE': <Tag icon={<MinusCircleOutlined />} color="default">
-      禁用
-    </Tag>,
-    'DELETED': <Tag icon={<ExclamationCircleOutlined />} color="error">
-      已删除
-    </Tag>
-  }
 
   /**
    * @en-US International configuration
@@ -123,6 +103,11 @@ const TableList: React.FC = () => {
   const intl = useIntl();
 
   const columns: ProColumns<API.RuleListItem>[] = [
+    {
+      title: '类型',
+      dataIndex: 'type',
+      search: false,
+    },
     {
       title: '名称',
       dataIndex: 'name',
@@ -141,23 +126,19 @@ const TableList: React.FC = () => {
       },
     },
     {
-      title: '昵称',
-      dataIndex: 'nickName',
+      title: '值',
+      dataIndex: 'value',
+      search: false,
     },
     {
-      title: '手机号',
-      dataIndex: 'phone',
+      title: '序号',
+      dataIndex: '',
+      search: false,
     },
     {
-      title: '邮箱',
-      dataIndex: 'email',
-    },
-    {
-      title: '状态',
-      dataIndex: '**state',
-      render: (dom, entity) => dict_state[entity.state] ?? <Tag>{entity?.state ?? '-'}</Tag>,
-      valueType: 'select',
-      valueEnum: dict_state
+      title: '扩展选项',
+      dataIndex: 'options',
+      search: false,
     },
     {
       title: '创建时间',
@@ -186,31 +167,6 @@ const TableList: React.FC = () => {
         >
           <EditOutlined /> 编辑
         </Button>,
-        <Button
-          type="link"
-          key="edit-password"
-          onClick={() => {
-            setCurrentRow(record);
-            _action_modal_1(true);
-          }}
-        >
-          <KeyOutlined /> 修改密码
-        </Button>,
-        <Switch checkedChildren="启用" unCheckedChildren="禁用" checked={record.state === 'ENABLE'} disabled={record.state == 'DELETED'} onChange={async v => {
-          const { id } = record;
-          const hide = message.loading('正在' + (v ? '启用' : '禁用'));
-          try {
-            await (v ? users.enable({ id }) : users.disable({ id }));
-            hide();
-            message.success((v ? '启用' : '禁用') + '成功');
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-            return true;
-          } catch (error) {
-            return false;
-          }
-        }} />,
       ],
     },
   ];
@@ -240,7 +196,7 @@ const TableList: React.FC = () => {
             <PlusOutlined />新建
           </Button>,
         ]}
-        request={users.get}
+        request={dict.get}
         columns={columns}
         rowSelection={{
           onChange: (_, selectedRows) => {
@@ -319,38 +275,6 @@ const TableList: React.FC = () => {
           name="nickName"
           label="昵称"
         />
-        {
-          currentRow?.id ? null : <>
-            <ProFormText.Password
-              rules={[
-                {
-                  required: true,
-                },
-              ]}
-              width="md"
-              name="password"
-              label="密码"
-            />
-            <ProFormText.Password
-              rules={[
-                {
-                  required: true,
-                },
-                ({ getFieldValue }) => ({
-                  validator(rule, value) {
-                    if (!value || getFieldValue('password') === value) {
-                      return Promise.resolve()
-                    }
-                    return Promise.reject("两次密码输入不一致")
-                  }
-                }),
-              ]}
-              width="md"
-              name="check_password"
-              label="确认密码"
-            />
-          </>
-        }
         <ProFormText
           rules={[
             {
@@ -371,69 +295,7 @@ const TableList: React.FC = () => {
           name="email"
           label="邮箱"
         />
-        <ProFormSelect
-          name="roleId"
-          label="角色"
-          valueEnum={rolesData}
-          rules={[{ required: true }]}
-        />
-      </ModalForm>
-      <ModalForm
-        title={'修改密码'}
-        width="400px"
-        open={action_modal_1}
-        onOpenChange={_action_modal_1}
-        modalProps={{
-          destroyOnClose: true,
-        }}
-        initialValues={currentRow}
-        onFinish={async (value) => {
-          let success;
-          const { id } = currentRow;
-          if (id) {
-            const hide = message.loading('正在修改');
-            try {
-              await users.changePassword({ id, ...value });
-              hide();
-              message.success('修改密码成功');
-              _action_modal_1(false);
-              if (actionRef.current) {
-                actionRef.current.reload();
-              }
-            } catch (error) {
-              message.error('修改密码失败!');
-            }
-          }
-        }}
-      >
-        <ProFormText.Password
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-          width="md"
-          name="password"
-          label="新密码"
-        />
-        <ProFormText.Password
-          rules={[
-            {
-              required: true,
-            },
-            ({ getFieldValue }) => ({
-              validator(rule, value) {
-                if (!value || getFieldValue('password') === value) {
-                  return Promise.resolve()
-                }
-                return Promise.reject("两次密码输入不一致")
-              }
-            }),
-          ]}
-          width="md"
-          name="check_password"
-          label="确认密码"
-        />
+
       </ModalForm>
       <Drawer
         width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}

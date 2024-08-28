@@ -90,10 +90,10 @@ export default [
         component: './roles/list',
       },
       {
-        path: 'zdgl/list',
+        path: 'dict/list',
         name: '字典管理',
-        icon: '',
-        component: './dev',
+        icon: 'fontColors',
+        component: './dict/list',
       },
       {
         path: 'users/list',
