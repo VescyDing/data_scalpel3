@@ -1,4 +1,4 @@
-import { users, dict } from '@/services/ant-design-pro/api_v1';
+import { users, dict, roles } from '@/services/ant-design-pro/api_v1';
 import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, MinusCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
@@ -9,7 +9,8 @@ import {
   ProFormText,
   ProFormTextArea,
   ProTable,
-  ProFormCheckbox
+  ProFormCheckbox,
+  ProFormSelect,
 } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { Button, Drawer, Input, message, Tag } from 'antd';
@@ -95,11 +96,19 @@ const TableList: React.FC = () => {
   const [currentRow, setCurrentRow] = useState<API.RuleListItem>({});
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
+  const [rolesData, _rolesData] = useState<boolean>({});
+
   useEffect(() => {
     if (!createModalOpen) {
       setCurrentRow({});
     }
   }, [createModalOpen])
+
+  useEffect(() => {
+    roles.get({ current: 1, pageSize: 1000 }).then(res => {
+      _rolesData(_.mapValues(_.keyBy(res.data, 'id'), 'name'))
+    })
+  }, [])
 
   const dict_state = {
     'ENABLE': <Tag icon={<CheckCircleOutlined />} color="processing">
@@ -266,7 +275,7 @@ const TableList: React.FC = () => {
         </FooterToolbar>
       )}
       <ModalForm
-        title={(currentRow?.id ? '编辑' : '新建') + '角色'}
+        title={(currentRow?.id ? '编辑' : '新建') + '用户'}
         width="400px"
         open={createModalOpen}
         onOpenChange={handleModalOpen}
@@ -298,14 +307,81 @@ const TableList: React.FC = () => {
           ]}
           width="md"
           name="name"
-          label="角色名称"
+          label="名称"
         />
-
+        <ProFormText
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          width="md"
+          name="nickName"
+          label="昵称"
+        />
+        {
+          currentRow?.id ? null : <>
+            <ProFormText.Password
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+              width="md"
+              name="password"
+              label="密码"
+            />
+            <ProFormText.Password
+              rules={[
+                {
+                  required: true,
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (!value || getFieldValue('password') === value) {
+                      return Promise.resolve()
+                    }
+                    return Promise.reject("两次密码输入不一致")
+                  }
+                }),
+              ]}
+              width="md"
+              name="check_password"
+              label="确认密码"
+            />
+          </>
+        }
+        <ProFormText
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          width="md"
+          name="phone"
+          label="手机号"
+        />
+        <ProFormText
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          width="md"
+          name="email"
+          label="邮箱"
+        />
+        <ProFormSelect
+          name="roleId"
+          label="角色"
+          valueEnum={rolesData}
+          rules={[{ required: true }]}
+        />
       </ModalForm>
 
 
       <Drawer
-        width={600}
+        width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}
         open={showDetail}
         onClose={() => {
           setCurrentRow(undefined);

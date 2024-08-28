@@ -46,7 +46,6 @@ const roles = {
   delete: async (data: { [key: string]: any }) => {
     return request(`${baseUrl}/roles/${data.id}`, {
       method: 'DELETE',
-      data
     });
   },
 }
@@ -84,13 +83,11 @@ const users = {
   delete: async (data: { [key: string]: any }) => {
     return request(`${baseUrl}/users/${data.id}`, {
       method: 'DELETE',
-      data
     });
   },
   enable: async (data?: { [key: string]: any }) => {
     return request(`${baseUrl}/users/${data.id}/actions/enable`, {
       method: 'POST',
-      data
     });
   },
   disable: async (data?: { [key: string]: any }) => {

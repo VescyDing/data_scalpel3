@@ -297,7 +297,7 @@ const TableList: React.FC = () => {
 
 
       <Drawer
-        width={600}
+        width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}
         open={showDetail}
         onClose={() => {
           setCurrentRow(undefined);
