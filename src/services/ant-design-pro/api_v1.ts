@@ -121,8 +121,62 @@ const users = {
   },
 }
 
+const dataSources = {
+  get: async (
+    data?: { [key: string]: any },
+  ) => {
+    return listTransOut(await request(`${baseUrl}/data-sources?${(new URLSearchParams(listTransIn(data ?? {}))).toString()}`, {
+      method: 'GET',
+    }));
+  },
+  put: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/data-sources/${data.id}`, {
+      method: 'PUT',
+      data
+    });
+  },
+  post: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/data-sources`, {
+      method: 'POST',
+      data
+    });
+  },
+  delete: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/data-sources/${data.id}`, {
+      method: 'DELETE',
+    });
+  },
+}
+const catalogs = {
+  get: async (
+    data?: { [key: string]: any },
+  ) => {
+    return await request(`${baseUrl}/catalogs?${(new URLSearchParams(data ?? {})).toString()}`, {
+      method: 'GET',
+    });
+  },
+  put: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/catalogs/${data.id}`, {
+      method: 'PUT',
+      data
+    });
+  },
+  post: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/catalogs`, {
+      method: 'POST',
+      data
+    });
+  },
+  delete: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/catalogs/${data.id}`, {
+      method: 'DELETE',
+    });
+  },
+}
 export {
   roles,
   dict,
   users,
+  dataSources,
+  catalogs,
 }

@@ -111,7 +111,7 @@ const TableList: React.FC = () => {
     {
       title: '名称',
       dataIndex: 'name',
-      tip: 'The name is the unique key',
+
       render: (dom, entity) => {
         return (
           <a

@@ -61,6 +61,12 @@ export default [
     component: './404',
   },
   {
+    path: '/data-sources/list',
+    name: '数据源管理',
+    icon: 'database',
+    component: './data-sources/list',
+  },
+  {
     path: '/xtgl',
     name: '系统管理',
     icon: 'setting',
