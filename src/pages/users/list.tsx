@@ -1,5 +1,5 @@
 import { users, dict, roles } from '@/services/ant-design-pro/api_v1';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, MinusCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, MinusCircleOutlined, ExclamationCircleOutlined, KeyOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
@@ -13,7 +13,7 @@ import {
   ProFormSelect,
 } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { Button, Drawer, Input, message, Tag } from 'antd';
+import { Button, Drawer, Input, message, Tag, Switch } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import _ from 'lodash'
 
@@ -30,8 +30,6 @@ const handleAdd = async (fields: API.RuleListItem) => {
     message.success('添加成功');
     return true;
   } catch (error) {
-    hide();
-    // message.error('Adding failed, please try again!');
     return false;
   }
 };
@@ -50,8 +48,6 @@ const handleUpdate = async (fields: FormValueType) => {
     message.success('更新成功');
     return true;
   } catch (error) {
-    hide();
-    // message.error('Configuration failed, please try again!');
     return false;
   }
 };
@@ -72,8 +68,6 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
     message.success('删除成功');
     return true;
   } catch (error) {
-    hide();
-    // message.error('Delete failed, please try again');
     return false;
   }
 };
@@ -84,12 +78,12 @@ const TableList: React.FC = () => {
    * @zh-CN 新建窗口的弹窗
    *  */
   const [createModalOpen, handleModalOpen] = useState<boolean>(false);
+  const [action_modal_1, _action_modal_1] = useState<boolean>(false);
+
   /**
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
    * */
-  const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
-
   const [showDetail, setShowDetail] = useState<boolean>(false);
 
   const actionRef = useRef<ActionType>();
@@ -192,16 +186,31 @@ const TableList: React.FC = () => {
         >
           <EditOutlined /> 编辑
         </Button>,
-        // <Button
-        //   type="link"
-        //   key="edit"
-        //   danger
-        //   onClick={() => {
-        //     setCurrentRow(record);
-        //   }}
-        // >
-        //   <DeleteOutlined /> 删除
-        // </Button>,
+        <Button
+          type="link"
+          key="edit-password"
+          onClick={() => {
+            setCurrentRow(record);
+            _action_modal_1(true);
+          }}
+        >
+          <KeyOutlined /> 修改密码
+        </Button>,
+        <Switch checkedChildren="启用" unCheckedChildren="禁用" checked={record.state === 'ENABLE'} disabled={record.state == 'DELETED'} onChange={async v => {
+          const { id } = record;
+          const hide = message.loading('正在' + (v ? '启用' : '禁用'));
+          try {
+            await (v ? users.enable({ id }) : users.disable({ id }));
+            hide();
+            message.success((v ? '启用' : '禁用') + '成功');
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+            return true;
+          } catch (error) {
+            return false;
+          }
+        }} />,
       ],
     },
   ];
@@ -378,8 +387,63 @@ const TableList: React.FC = () => {
           rules={[{ required: true }]}
         />
       </ModalForm>
-
-
+      <ModalForm
+        title={'修改密码'}
+        width="400px"
+        open={action_modal_1}
+        onOpenChange={_action_modal_1}
+        modalProps={{
+          destroyOnClose: true,
+        }}
+        initialValues={currentRow}
+        onFinish={async (value) => {
+          let success;
+          const { id } = currentRow;
+          if (id) {
+            const hide = message.loading('正在修改');
+            try {
+              await users.changePassword({ id, ...value });
+              hide();
+              message.success('修改密码成功');
+              _action_modal_1(false);
+              if (actionRef.current) {
+                actionRef.current.reload();
+              }
+            } catch (error) {
+              message.error('修改密码失败!');
+            }
+          }
+        }}
+      >
+        <ProFormText.Password
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          width="md"
+          name="password"
+          label="新密码"
+        />
+        <ProFormText.Password
+          rules={[
+            {
+              required: true,
+            },
+            ({ getFieldValue }) => ({
+              validator(rule, value) {
+                if (!value || getFieldValue('password') === value) {
+                  return Promise.resolve()
+                }
+                return Promise.reject("两次密码输入不一致")
+              }
+            }),
+          ]}
+          width="md"
+          name="check_password"
+          label="确认密码"
+        />
+      </ModalForm>
       <Drawer
         width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}
         open={showDetail}

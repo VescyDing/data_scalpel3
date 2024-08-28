@@ -29,8 +29,6 @@ const handleAdd = async (fields: API.RuleListItem) => {
     message.success('添加成功');
     return true;
   } catch (error) {
-    hide();
-    // message.error('Adding failed, please try again!');
     return false;
   }
 };
@@ -49,8 +47,6 @@ const handleUpdate = async (fields: FormValueType) => {
     message.success('更新成功');
     return true;
   } catch (error) {
-    hide();
-    // message.error('Configuration failed, please try again!');
     return false;
   }
 };
@@ -71,8 +67,6 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
     message.success('删除成功');
     return true;
   } catch (error) {
-    hide();
-    // message.error('Delete failed, please try again');
     return false;
   }
 };
@@ -87,7 +81,6 @@ const TableList: React.FC = () => {
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
    * */
-  const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
 
   const [showDetail, setShowDetail] = useState<boolean>(false);
 
@@ -171,16 +164,6 @@ const TableList: React.FC = () => {
         >
           <EditOutlined /> 编辑
         </Button>,
-        // <Button
-        //   type="link"
-        //   key="edit"
-        //   danger
-        //   onClick={() => {
-        //     setCurrentRow(record);
-        //   }}
-        // >
-        //   <DeleteOutlined /> 删除
-        // </Button>,
       ],
     },
   ];
