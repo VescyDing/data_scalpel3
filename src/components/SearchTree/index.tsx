@@ -37,6 +37,10 @@ const getParentKey = (key: React.Key, tree: TreeDataNode[]): React.Key => {
 const App: React.FC = (props: any) => {
     const [defaultData, _defaultData] = useState([]);
 
+    const onSelect = (...args: any) => {
+        props?.onSelect?.(...args)
+    }
+
     useEffect(() => {
         _defaultData(props.treeData)
         generateList(defaultData)
@@ -104,6 +108,7 @@ const App: React.FC = (props: any) => {
                 expandedKeys={expandedKeys}
                 autoExpandParent={autoExpandParent}
                 treeData={treeData}
+                onSelect={onSelect}
             />
         </div>
     );

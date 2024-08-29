@@ -93,6 +93,7 @@ const TableList: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
   const [catalogsTree, _catalogsTree] = useState([]);
+  const [params, _params] = useState({});
 
 
   useEffect(() => {
@@ -209,11 +210,15 @@ const TableList: React.FC = () => {
 
   const detail_columns: ProColumns<API.RuleListItem>[] = []
 
+  const onSelect = (...args: any) => {
+    _params(args[0][0] ? { '**catalogId': args[0][0] } : {})
+  }
+
   return (
     <PageContainer>
       <Layout style={{ minHeight: '100%' }}>
         <Layout.Sider width="25%" style={{ backgroundColor: 'rgba(255, 255, 255)', marginRight: '16px', borderRadius: '6px', padding: '16px', paddingTop: '23px' }} >
-          <SearchTree treeData={catalogsTree} />
+          <SearchTree treeData={catalogsTree} onSelect={onSelect} />
         </Layout.Sider>
         <Layout.Content >
           <ProTable<API.RuleListItem, API.PageParams>
@@ -237,6 +242,7 @@ const TableList: React.FC = () => {
                 <PlusOutlined />新建
               </Button>,
             ]}
+            params={params}
             request={dataSources.get}
             columns={columns}
             rowSelection={{
