@@ -39,7 +39,7 @@ const handleAdd = async (fields: API.RuleListItem) => {
  *
  * @param fields
  */
-const handleUpdate = async (fields: FormValueType) => {
+const handleUpdate = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在更新');
   try {
     await roles.put(fields);

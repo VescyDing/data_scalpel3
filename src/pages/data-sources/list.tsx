@@ -31,7 +31,7 @@ import { data_source_type_icon, data_source_dict_name } from './enum';
 const handleAdd = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在添加');
   try {
-    await dataSources.post({ ...fields, category: 'DATASOURCE' });
+    await dataSources.post(fields);
     hide();
     message.success('添加成功');
     return true;
@@ -46,10 +46,10 @@ const handleAdd = async (fields: API.RuleListItem) => {
  *
  * @param fields
  */
-const handleUpdate = async (fields: FormValueType) => {
+const handleUpdate = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在更新');
   try {
-    await dataSources.put({ ...fields, category: 'DATASOURCE' });
+    await dataSources.put(fields);
     hide();
     message.success('更新成功');
     return true;
@@ -78,7 +78,9 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
   }
 };
 
-const TableList: React.FC = () => {
+const TableList: React.FC = (props: { category?: string }) => {
+  const { category = 'DATASOURCE' } = props;
+
   /**
    * @en-US Pop-up window of new window
    * @zh-CN 新建窗口的弹窗
@@ -97,7 +99,7 @@ const TableList: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
   const [catalogsTree, _catalogsTree] = useState([]);
-  const [params, _params] = useState({});
+  const [params, _params] = useState({ '**category': category });
   const [datasource, _datasource] = useState([]);
 
   const [state, _state] = useState({});
@@ -215,7 +217,7 @@ const TableList: React.FC = () => {
   const detail_columns: ProColumns<API.RuleListItem>[] = []
 
   const onSelect = (...args: any) => {
-    _params(args[0][0] ? { '**catalogId': args[0][0] } : {})
+    _params(args[0][0] ? { '**catalogId': args[0][0], '**category': category } : { '**category': category })
   }
 
   return (
@@ -301,9 +303,9 @@ const TableList: React.FC = () => {
           let success;
           const { id } = currentRow;
           if (id) {
-            success = await handleUpdate({ id, ...value } as API.RuleListItem);
+            success = await handleUpdate({ id, category, ...value, } as API.RuleListItem);
           } else {
-            success = await handleAdd(value as API.RuleListItem);
+            success = await handleAdd({ category, ...value, } as API.RuleListItem);
           }
           if (success) {
             handleModalOpen(false);

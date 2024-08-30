@@ -78,11 +78,12 @@ export default [
         component: './dev',
       },
       {
-        path: 'sjcc/list',
+        path: 'data-sources/list',
         name: '数据存储',
-        icon: '',
-        component: './dev',
+        icon: 'database',
+        component: './data-storage/index',
       },
+
       {
         path: 'xtrz/list',
         name: '系统日志',
