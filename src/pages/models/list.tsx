@@ -224,11 +224,11 @@ const TableList: React.FC = (props: { category?: string }) => {
         >
           <HighlightOutlined /> 编辑字段
         </Button>,
-        <Switch checkedChildren="上线" unCheckedChildren="下线" checked={record.state === 'ONLINE'} onChange={async v => {
+        <Switch checkedChildren="在线" unCheckedChildren="下线" checked={record.state === 'ONLINE'} onChange={async v => {
           const { id } = record;
           const hide = message.loading('正在' + (v ? '上线' : '下线'));
           try {
-            await (v ? users.enable({ id }) : users.disable({ id }));
+            await (v ? models.online({ id }) : models.offline({ id }));
             hide();
             message.success((v ? '上线' : '下线') + '成功');
             if (actionRef.current) {

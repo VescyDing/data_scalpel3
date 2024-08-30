@@ -199,6 +199,18 @@ const models = {
       method: 'DELETE',
     });
   },
+  online: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/models/${data.id}/actions/online`, {
+      method: 'PUT',
+      data
+    });
+  },
+  offline: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/models/${data.id}/actions/offline`, {
+      method: 'PUT',
+      data
+    });
+  },
 }
 
 
