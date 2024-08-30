@@ -120,7 +120,7 @@ const TableList: React.FC = (props: { category?: string }) => {
 
   useEffect(() => {
     catalogs.get({
-      type: 'DATA_SOURCE',
+      type: category,
       tree: true
     }).then((res) => {
       _catalogsTree(transTreeData(res.data) as [])
