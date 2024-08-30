@@ -173,10 +173,40 @@ const catalogs = {
     });
   },
 }
+
+const models = {
+  get: async (
+    data?: { [key: string]: any },
+  ) => {
+    return listTransOut(await request(`${baseUrl}/models?${(new URLSearchParams(listTransIn(data ?? {}))).toString()}`, {
+      method: 'GET',
+    }));
+  },
+  put: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/models/${data.id}`, {
+      method: 'PUT',
+      data
+    });
+  },
+  post: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/models`, {
+      method: 'POST',
+      data
+    });
+  },
+  delete: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/models/${data.id}`, {
+      method: 'DELETE',
+    });
+  },
+}
+
+
 export {
   roles,
   dict,
   users,
   dataSources,
   catalogs,
+  models,
 }

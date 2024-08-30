@@ -67,6 +67,12 @@ export default [
     component: './data-sources/list',
   },
   {
+    path: '/models/list',
+    name: '模型管理',
+    icon: 'build',
+    component: './models/list',
+  },
+  {
     path: '/xtgl',
     name: '系统管理',
     icon: 'setting',

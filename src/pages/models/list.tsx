@@ -1,5 +1,5 @@
-import { dataSources, catalogs, dict } from '@/services/ant-design-pro/api_v1';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined, } from '@ant-design/icons';
+import { models, catalogs, dataSources } from '@/services/ant-design-pro/api_v1';
+import { PlusOutlined, EditOutlined, DeleteOutlined, QuestionCircleOutlined, SyncOutlined, MinusCircleOutlined, HighlightOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
@@ -31,7 +31,7 @@ import { data_source_type_icon, data_source_dict_name } from './enum';
 const handleAdd = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在添加');
   try {
-    await dataSources.post(fields);
+    await models.post(fields);
     hide();
     message.success('添加成功');
     return true;
@@ -49,7 +49,7 @@ const handleAdd = async (fields: API.RuleListItem) => {
 const handleUpdate = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在更新');
   try {
-    await dataSources.put(fields);
+    await models.put(fields);
     hide();
     message.success('更新成功');
     return true;
@@ -68,7 +68,7 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
   try {
-    const requests = selectedRows.map(({ id }) => dataSources.delete({ id }))
+    const requests = selectedRows.map(({ id }) => models.delete({ id }))
     await Promise.all(requests)
     hide();
     message.success('删除成功');
@@ -79,7 +79,7 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
 };
 
 const TableList: React.FC = (props: { category?: string }) => {
-  const { category = 'DATA_SOURCE' } = props;
+  const { category = 'MODEL' } = props;
 
   /**
    * @en-US Pop-up window of new window
@@ -99,7 +99,7 @@ const TableList: React.FC = (props: { category?: string }) => {
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
   const [catalogsTree, _catalogsTree] = useState([]);
-  const [params, _params] = useState({ '**category': category });
+  const [params, _params] = useState({});
   const [datasource, _datasource] = useState([]);
 
   const [state, _state] = useState({});
@@ -125,17 +125,23 @@ const TableList: React.FC = (props: { category?: string }) => {
     }).then((res) => {
       _catalogsTree(transTreeData(res.data) as [])
     })
+    dataSources.get({
+      '**category': 'DATA_STORAGE',
+      current: 1, pageSize: 1000,
+    }).then((res) => {
+      _datasource(_.map(res.data, ({ name, alias, id }) => ({ label: `${name} (${alias})`, value: id })))
+    })
   }, [])
 
   const dict_state = {
-    'OK': <Tag icon={<CheckCircleOutlined />} color="success">
-      可用
+    'DRAFT': <Tag icon={<QuestionCircleOutlined />} color="processing">
+      草稿
     </Tag>,
-    'WARN': <Tag icon={<ExclamationCircleOutlined />} color="warning">
-      异常
+    'ONLINE': <Tag icon={<SyncOutlined spin />} color="success">
+      在线
     </Tag>,
-    'ERROR': <Tag icon={<CloseCircleOutlined />} color="error">
-      错误
+    'OFFLINE': <Tag icon={<MinusCircleOutlined />} color="default">
+      下线
     </Tag>
   }
 
@@ -166,11 +172,8 @@ const TableList: React.FC = (props: { category?: string }) => {
       },
     },
     {
-      title: '类型',
-      dataIndex: '**type',
-      render: (dom, entity) => data_source_type_icon[entity.type] ?? <Tag>{entity?.type ?? '-'}</Tag>,
-      valueType: 'select',
-      valueEnum: data_source_type_icon
+      title: '别名',
+      dataIndex: 'alias',
     },
     {
       title: '状态',
@@ -180,9 +183,14 @@ const TableList: React.FC = (props: { category?: string }) => {
       valueEnum: dict_state
     },
     {
-      title: '最后检测时间',
-      dataIndex: 'lastCheckTime',
-      valueType: 'dateTime',
+      title: '描述',
+      dataIndex: 'description',
+      valueType: 'textarea',
+      search: false,
+    },
+    {
+      title: '记录数',
+      dataIndex: 'recordCount',
       search: false,
     },
     {
@@ -201,15 +209,36 @@ const TableList: React.FC = (props: { category?: string }) => {
           key="edit"
           onClick={() => {
             setCurrentRow(record);
-            _state({
-              ...state,
-              type: record.type,
-            })
             handleModalOpen(true);
           }}
         >
-          <EditOutlined /> 更新
+          <EditOutlined /> 编辑
         </Button>,
+        <Button
+          type="link"
+          key="edit_action_1"
+          onClick={() => {
+            setCurrentRow(record);
+            _action_modal_1(true);
+          }}
+        >
+          <HighlightOutlined /> 编辑字段
+        </Button>,
+        <Switch checkedChildren="上线" unCheckedChildren="下线" checked={record.state === 'ONLINE'} onChange={async v => {
+          const { id } = record;
+          const hide = message.loading('正在' + (v ? '上线' : '下线'));
+          try {
+            await (v ? users.enable({ id }) : users.disable({ id }));
+            hide();
+            message.success((v ? '上线' : '下线') + '成功');
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+            return true;
+          } catch (error) {
+            return false;
+          }
+        }} />,
       ],
     },
   ];
@@ -217,7 +246,7 @@ const TableList: React.FC = (props: { category?: string }) => {
   const detail_columns: ProColumns<API.RuleListItem>[] = []
 
   const onSelect = (...args: any) => {
-    _params(args[0][0] ? { '**catalogId': args[0][0], '**category': category } : { '**category': category })
+    _params(args[0][0] ? { '**catalogId': args[0][0], } : {})
   }
 
   return (
@@ -242,10 +271,6 @@ const TableList: React.FC = (props: { category?: string }) => {
               <Button
                 key="primary"
                 onClick={() => {
-                  _state({
-                    ...state,
-                    type: ''
-                  })
                   handleModalOpen(true);
                 }}
               >
@@ -253,7 +278,7 @@ const TableList: React.FC = (props: { category?: string }) => {
               </Button>,
             ]}
             params={params}
-            request={dataSources.get}
+            request={models.get}
             columns={columns}
             rowSelection={{
               onChange: (_, selectedRows) => {
@@ -291,8 +316,8 @@ const TableList: React.FC = (props: { category?: string }) => {
         </FooterToolbar>
       )}
       <ModalForm
-        title={(currentRow?.id ? '编辑' : '新建') + '数据源'}
-        width="800px"
+        title={(currentRow?.id ? '编辑' : '新建') + '模型'}
+        width="400px"
         open={createModalOpen}
         onOpenChange={handleModalOpen}
         modalProps={{
@@ -303,9 +328,9 @@ const TableList: React.FC = (props: { category?: string }) => {
           let success;
           const { id } = currentRow;
           if (id) {
-            success = await handleUpdate({ id, category, ...value, } as API.RuleListItem);
+            success = await handleUpdate({ id, ...value, } as API.RuleListItem);
           } else {
-            success = await handleAdd({ category, ...value, } as API.RuleListItem);
+            success = await handleAdd({ ...value, } as API.RuleListItem);
           }
           if (success) {
             handleModalOpen(false);
@@ -336,109 +361,40 @@ const TableList: React.FC = (props: { category?: string }) => {
             name="alias"
             label="别名"
           />
-          <ProFormSelect
-            name="type"
-            width="md"
-            label="数据源类型"
-            rules={[{ required: true }]}
-            disabled={!!currentRow?.id}
-            request={async () => await dict_type_dom}
-            onChange={async v => {
-              _state({
-                ...state,
-                type: v
-              })
-              if (data_source_dict_name[v]) {
-                const res = await dict.get({
-                  '**type': data_source_dict_name[v],
-                  current: 1,
-                  pageSize: 1000,
-                })
-                _datasource(res.data)
-              }
-            }}
-          />
-          <ProFormSelect
-            name={['props', 'type']}
-            width="md"
-            label="数据库类型"
-            rules={[{ required: true }]}
-            valueEnum={_.mapValues(_.keyBy(datasource, 'name'), 'value')}
-            disabled={!datasource.length}
-          />
           <ProFormTreeSelect
             name='catalogId'
             width="md"
             label="挂载目录"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
             request={async () => await catalogsTree}
           />
+          <ProFormSelect
+            name='datasourceId'
+            width="md"
+            label="存储"
+            showSearch
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+            request={async () => await datasource}
+          />
+          <ProFormTextArea
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+            width="md"
+            name="description"
+            label="描述"
+          />
         </ProForm.Group>
-        <div style={state.type ? { backgroundColor: '#fafafa', borderRadius: '8px', border: '1px solid #d9d9d9', padding: '12px', boxSizing: 'border-box' } : { display: 'none' }}>
-          <ProForm.Group >
-            {
-              state.type == 'JDBC' && <>
-                <ProFormText
-                  rules={[
-                    {
-                      required: true,
-                    },
-                  ]}
-                  width="md"
-                  name={['props', 'host']}
-                  label="地址"
-                />
-                <ProFormDigit
-                  rules={[
-                    {
-                      required: true,
-                    },
-                  ]}
-                  width="md"
-                  name={['props', 'port']}
-                  label="端口"
-                />
-                <ProFormText
-                  rules={[
-                    {
-                      required: true,
-                    },
-                  ]}
-                  width="md"
-                  name={['props', 'database']}
-                  label="数据库"
-                />
-                <ProFormText
-                  rules={[
-                    {
-                      required: true,
-                    },
-                  ]}
-                  width="md"
-                  name={['props', 'username']}
-                  label="用户名"
-                />
-                <ProFormText.Password
-                  rules={[
-                    {
-                      required: true,
-                    },
-                  ]}
-                  width="md"
-                  name={['props', 'password']}
-                  label="密码"
-                />
-              </>
-            }
-          </ProForm.Group>
-          <ProForm.Group>
-            <ProFormTextArea
-              width="md"
-              name={['props', 'params']}
-              label="高级选项"
-              placeholder={'请输入标准JSON字符串，如：{"key":"value"}。'}
-            />
-          </ProForm.Group>
-        </div>
       </ModalForm>
       <Drawer
         width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}

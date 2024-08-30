@@ -117,7 +117,6 @@ const TableList: React.FC = () => {
     {
       title: '角色名称',
       dataIndex: 'name',
-
       render: (dom, entity) => {
         return (
           <a
@@ -277,8 +276,6 @@ const TableList: React.FC = () => {
           options={_.map(AuthType, ({ name, value }) => ({ label: name, value }))}
         />
       </ModalForm>
-
-
       <Drawer
         width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}
         open={showDetail}
