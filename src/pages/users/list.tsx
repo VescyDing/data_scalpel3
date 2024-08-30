@@ -373,6 +373,7 @@ const TableList: React.FC = () => {
         />
         <ProFormSelect
           name="roleId"
+          width="md"
           label="角色"
           valueEnum={rolesData}
           rules={[{ required: true }]}
