@@ -79,7 +79,7 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
 };
 
 const TableList: React.FC = (props: { category?: string }) => {
-  const { category = 'DATASOURCE' } = props;
+  const { category = 'DATA_SOURCE' } = props;
 
   /**
    * @en-US Pop-up window of new window
@@ -120,7 +120,7 @@ const TableList: React.FC = (props: { category?: string }) => {
 
   useEffect(() => {
     catalogs.get({
-      type: 'DATASOURCE',
+      type: 'DATA_SOURCE',
       tree: true
     }).then((res) => {
       _catalogsTree(transTreeData(res.data) as [])
