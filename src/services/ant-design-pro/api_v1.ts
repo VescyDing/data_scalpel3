@@ -211,6 +211,17 @@ const models = {
       data
     });
   },
+  getFields: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/models/${data.id}/fields`, {
+      method: 'GET',
+    });
+  },
+  updateFields: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/models/${data.id}/fields`, {
+      method: 'PUT',
+      data
+    });
+  },
 }
 
 

@@ -15,13 +15,14 @@ import {
   ProForm,
   ProFormDigit,
   ProFormTreeSelect,
+  ProFormList,
 } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout } from 'antd';
+import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import _ from 'lodash'
 import SearchTree from '@/components/SearchTree';
-import { data_source_type_icon, data_source_dict_name } from './enum';
+import { data_source_type_icon, data_source_dict_name, field_type_dict } from './enum';
 
 /**
  * @en-US Add node
@@ -72,6 +73,18 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
     await Promise.all(requests)
     hide();
     message.success('删除成功');
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+const handleUpdateFields = async (fields: API.RuleListItem) => {
+  const hide = message.loading('正在更新字段');
+  try {
+    await models.updateFields(fields);
+    hide();
+    message.success('更新成功');
     return true;
   } catch (error) {
     return false;
@@ -217,8 +230,11 @@ const TableList: React.FC = (props: { category?: string }) => {
         <Button
           type="link"
           key="edit_action_1"
-          onClick={() => {
-            setCurrentRow(record);
+          onClick={async () => {
+            const hide = message.loading('获取字段中');
+            const res = await models.getFields({ id: record.id });
+            hide();
+            setCurrentRow({ ...record, fields: res.data });
             _action_modal_1(true);
           }}
         >
@@ -340,61 +356,165 @@ const TableList: React.FC = (props: { category?: string }) => {
           }
         }}
       >
-        <ProForm.Group>
-          <ProFormText
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-            width="md"
-            name="name"
-            label="名称"
-          />
-          <ProFormText
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-            width="md"
-            name="alias"
-            label="别名"
-          />
-          <ProFormTreeSelect
-            name='catalogId'
-            width="md"
-            label="挂载目录"
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-            request={async () => await catalogsTree}
-          />
-          <ProFormSelect
-            name='datasourceId'
-            width="md"
-            label="存储"
-            showSearch
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-            request={async () => await datasource}
-          />
-          <ProFormTextArea
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-            width="md"
-            name="description"
-            label="描述"
-          />
-        </ProForm.Group>
+        <ProFormText
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          width="md"
+          name="name"
+          label="名称"
+        />
+        <ProFormText
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          width="md"
+          name="alias"
+          label="别名"
+        />
+        <ProFormTreeSelect
+          name='catalogId'
+          width="md"
+          label="挂载目录"
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          request={async () => await catalogsTree}
+        />
+        <ProFormSelect
+          name='datasourceId'
+          width="md"
+          label="存储"
+          showSearch
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          request={async () => await datasource}
+        />
+        <ProFormTextArea
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          width="md"
+          name="description"
+          label="描述"
+        />
+      </ModalForm>
+      <ModalForm
+        title={'编辑模型字段'}
+        width="800px"
+        open={action_modal_1}
+        onOpenChange={_action_modal_1}
+        modalProps={{
+          destroyOnClose: true,
+        }}
+        initialValues={currentRow}
+        onFinish={async (value) => {
+          let success;
+          const { id } = currentRow;
+          success = await handleUpdateFields({ id, ...value, } as API.RuleListItem);
+          if (success) {
+            _action_modal_1(false);
+            if (actionRef.current) {
+              actionRef.current.reload();
+            }
+          }
+        }}
+      >
+        <ProFormList
+          name="fields"
+          initialValue={currentRow.fields}
+          creatorButtonProps={{
+            position: 'top',
+            creatorButtonText: '再建一个字段',
+          }}
+          creatorRecord={{
+            "id": "",
+            "modelId": "",
+            "name": "",
+            "alias": "",
+            "description": "",
+            "type": "",
+            "precision": null,
+            "scale": null,
+            "nullable": false,
+            "primaryKey": false,
+            "partitionKey": false
+          }}
+        >
+          <Row gutter={10} style={{ backgroundColor: '#fafafa', borderRadius: '8px', border: '1px solid #d9d9d9', padding: '12px', boxSizing: 'border-box', marginBottom: '12px' }} >
+            <Col span={8} >
+              <ProFormText
+                key="name"
+                name="name"
+                placeholder="请输入字段(英文)"
+              />
+            </Col>
+            <Col span={8}>
+              <ProFormText
+                key="alias"
+                name="alias"
+                placeholder="请输入字段名(中文)"
+              />
+            </Col>
+            <Col span={8}>
+              <ProFormText
+                key="description"
+                name="description"
+                placeholder="请输入备注"
+              />
+            </Col>
+            <Col span={8}>
+              <ProFormTreeSelect
+                name='type'
+                placeholder="请选择类型"
+                request={async () => await _.map(field_type_dict, (v) => ({ label: v, value: v }))}
+              />
+            </Col>
+            <Col span={8}>
+              <ProFormDigit
+                key="precision"
+                name="precision"
+                placeholder="请输入长度"
+              />
+            </Col>
+            <Col span={8}>
+              <ProFormDigit
+                key="scale"
+                name="scale"
+                placeholder="请输入精度"
+              />
+            </Col>
+            <Col>
+              <ProFormCheckbox
+                key="nullable"
+                name="nullable"
+              >是否不能为空</ProFormCheckbox>
+            </Col>
+            <Col>
+              <ProFormCheckbox
+                key="primaryKey"
+                name="primaryKey"
+              >是否主键</ProFormCheckbox>
+            </Col>
+            <Col>
+              <ProFormCheckbox
+                key="partitionKey"
+                name="partitionKey"
+              >是否分区字段</ProFormCheckbox>
+            </Col>
+          </Row>
+        </ProFormList>
       </ModalForm>
       <Drawer
         width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}

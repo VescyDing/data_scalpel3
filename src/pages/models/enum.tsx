@@ -15,3 +15,19 @@ export const data_source_dict_name = {
     'FTP': '',
     'API': '',
 }
+export const field_type_dict = {
+    BINARY: 'BINARY',
+    BYTE: 'BYTE',
+    SHORT: 'SHORT',
+    INTEGER: 'INTEGER',
+    LONG: 'LONG',
+    FLOAT: 'FLOAT',
+    DOUBLE: 'DOUBLE',
+    DECIMAL: 'DECIMAL',
+    STRING: 'STRING',
+    FIXEDSTRING: 'FIXEDSTRING',
+    BOOLEAN: 'BOOLEAN',
+    DATE: 'DATE',
+    TIMESTAMP: 'TIMESTAMP',
+    GEOMETRY: 'GEOMETRY',
+}
