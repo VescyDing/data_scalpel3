@@ -412,7 +412,7 @@ const TableList: React.FC = (props: { category?: string }) => {
       </ModalForm>
       <ModalForm
         title={'编辑模型字段'}
-        width="800px"
+        width="1200px"
         open={action_modal_1}
         onOpenChange={_action_modal_1}
         modalProps={{
@@ -431,13 +431,49 @@ const TableList: React.FC = (props: { category?: string }) => {
           }
         }}
       >
+        <Row gutter={10} style={{ backgroundColor: '#fafafa', borderRadius: '8px', border: '1px solid #d9d9d9', padding: '12px', boxSizing: 'border-box', marginBottom: '12px', marginRight: '39px' }} >
+          <Col span={3} >
+            字段(英文)
+          </Col>
+          <Col span={3}>
+            字段名(中文)
+          </Col>
+          <Col span={3}>
+            备注
+          </Col>
+          <Col span={3}>
+            类型
+          </Col>
+          <Col span={2}>
+            长度
+          </Col>
+          <Col span={2}>
+            精度
+          </Col>
+          <Col span={3}>
+            是否不能为空
+          </Col>
+          <Col span={3}>
+            是否分区字段
+          </Col>
+          <Col span={2}>
+            是否主键
+          </Col>
+        </Row>
         <ProFormList
           name="fields"
           initialValue={currentRow.fields}
           creatorButtonProps={{
-            position: 'top',
+            position: 'bottom',
             creatorButtonText: '再建一个字段',
+            style: {
+              position: 'absolute',
+              bottom: '-19px',
+              left: '-5px',
+              width: 'calc(100% - 34px)'
+            }
           }}
+          className='scroll-list'
           creatorRecord={{
             "id": "",
             "modelId": "",
@@ -453,65 +489,68 @@ const TableList: React.FC = (props: { category?: string }) => {
           }}
         >
           <Row gutter={10} style={{ backgroundColor: '#fafafa', borderRadius: '8px', border: '1px solid #d9d9d9', padding: '12px', boxSizing: 'border-box', marginBottom: '12px' }} >
-            <Col span={8} >
+            <Col span={3} >
               <ProFormText
                 key="name"
                 name="name"
                 placeholder="请输入字段(英文)"
               />
             </Col>
-            <Col span={8}>
+            <Col span={3}>
               <ProFormText
                 key="alias"
                 name="alias"
                 placeholder="请输入字段名(中文)"
               />
             </Col>
-            <Col span={8}>
-              <ProFormText
+            <Col span={3}>
+              <ProFormTextArea
                 key="description"
                 name="description"
                 placeholder="请输入备注"
+                fieldProps={{
+                  rows: 1,
+                }}
               />
             </Col>
-            <Col span={8}>
+            <Col span={3}>
               <ProFormTreeSelect
                 name='type'
                 placeholder="请选择类型"
                 request={async () => await _.map(field_type_dict, (v) => ({ label: v, value: v }))}
               />
             </Col>
-            <Col span={8}>
+            <Col span={2}>
               <ProFormDigit
                 key="precision"
                 name="precision"
                 placeholder="请输入长度"
               />
             </Col>
-            <Col span={8}>
+            <Col span={2}>
               <ProFormDigit
                 key="scale"
                 name="scale"
                 placeholder="请输入精度"
               />
             </Col>
-            <Col>
+            <Col span={3}>
               <ProFormCheckbox
                 key="nullable"
                 name="nullable"
-              >是否不能为空</ProFormCheckbox>
+              ></ProFormCheckbox>
             </Col>
-            <Col>
-              <ProFormCheckbox
-                key="primaryKey"
-                name="primaryKey"
-              >是否主键</ProFormCheckbox>
-            </Col>
-            <Col>
+            <Col span={3}>
               <ProFormCheckbox
                 key="partitionKey"
                 name="partitionKey"
-              >是否分区字段</ProFormCheckbox>
+              ></ProFormCheckbox>
+            </Col>
+            <Col span={2}>
+              <ProFormCheckbox
+                key="primaryKey"
+                name="primaryKey"
+              ></ProFormCheckbox>
             </Col>
           </Row>
         </ProFormList>
