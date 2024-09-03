@@ -1,4 +1,4 @@
-import { models, catalogs, dataSources } from '@/services/ant-design-pro/api_v1';
+import { models, catalogs, dataSources, dict } from '@/services/ant-design-pro/api_v1';
 import { PlusOutlined, EditOutlined, DeleteOutlined, QuestionCircleOutlined, SyncOutlined, MinusCircleOutlined, HighlightOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
@@ -19,7 +19,7 @@ import {
   EditableProTable,
 } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col } from 'antd';
+import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col, Select } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import _ from 'lodash'
 import SearchTree from '@/components/SearchTree';
@@ -117,6 +117,8 @@ const TableList: React.FC = (props: { category?: string }) => {
   const [datasource, _datasource] = useState([]);
 
   const [state, _state] = useState({});
+  const [columnType, _columnType] = useState({});
+  const [currentEditFieldRow, _currentEditFieldRow] = useState({});
 
   useEffect(() => {
     if (!createModalOpen) {
@@ -144,6 +146,14 @@ const TableList: React.FC = (props: { category?: string }) => {
       current: 1, pageSize: 1000,
     }).then((res) => {
       _datasource(_.map(res.data, ({ name, alias, id }) => ({ label: `${name} (${alias})`, value: id })))
+    })
+    dict.get({
+      '**type': 'ColumnType',
+      current: 1,
+      pageSize: 1000,
+    }).then((res) => {
+      _columnType(res.data as [])
+      console.log(columnType, _.map(columnType, 'value'));
     })
   }, [])
 
@@ -276,18 +286,38 @@ const TableList: React.FC = (props: { category?: string }) => {
     {
       title: '类型',
       dataIndex: 'type',
-      valueType: 'select',
-      valueEnum: field_type_dict
+      render: (dom, entity) => _.find(columnType, { value: dom })?.name ?? dom,
+      renderFormItem: ({ value, onChange }) => {
+        return <Select
+          options={_.map(columnType, item => ({ label: item.name, value: item.value, key: item.id, detail: item }))}
+          value={value}
+          onChange={(...args) => {
+            onChange?.(...args);
+            _currentEditFieldRow(args[1].detail)
+          }}
+          placeholder='请选择'
+        />
+      }
     },
     {
       title: '长度',
       dataIndex: 'precision',
       valueType: 'digit',
+      fieldProps: {
+        disabled: currentEditFieldRow?.options?.supportPrecision == 'false',
+        min: currentEditFieldRow?.options?.minPrecision,
+        max: currentEditFieldRow?.options?.maxPrecision,
+      }
     },
     {
       title: '精度',
       dataIndex: 'scale',
       valueType: 'digit',
+      fieldProps: {
+        disabled: currentEditFieldRow?.options?.supportScale == 'false',
+        min: currentEditFieldRow?.options?.minScale,
+        max: currentEditFieldRow?.options?.maxScale,
+      }
     },
     {
       title: '操作',
