@@ -16,6 +16,7 @@ import {
   ProFormDigit,
   ProFormTreeSelect,
   ProFormList,
+  EditableProTable,
 } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col } from 'antd';
@@ -259,6 +260,65 @@ const TableList: React.FC = (props: { category?: string }) => {
     },
   ];
 
+  const columns1: ProColumns<API.RuleListItem>[] = [
+    {
+      title: '字段(英文)',
+      dataIndex: 'name',
+    },
+    {
+      title: '字段名(中文)',
+      dataIndex: 'alias',
+    },
+    {
+      title: '备注',
+      dataIndex: 'description',
+    },
+    {
+      title: '类型',
+      dataIndex: 'type',
+      valueType: 'select',
+      valueEnum: field_type_dict
+    },
+    {
+      title: '长度',
+      dataIndex: 'precision',
+      valueType: 'digit',
+    },
+    {
+      title: '精度',
+      dataIndex: 'scale',
+      valueType: 'digit',
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      width: 200,
+      render: (text, record, _, action) => [
+        <a
+          key="editable"
+          onClick={() => {
+            action?.startEditable?.(record.index);
+          }}
+        >
+          编辑
+        </a>,
+        <a
+          key="delete"
+          style={{
+            color: 'red',
+          }}
+          onClick={() => {
+            setDataSource(dataSource.filter((item) => item.index !== record.index));
+          }}
+        >
+          删除
+        </a>,
+      ],
+    },
+  ]
+
+  const [dataSource, setDataSource] = useState([]);
+
   const detail_columns: ProColumns<API.RuleListItem>[] = []
 
   const onSelect = (...args: any) => {
@@ -422,7 +482,7 @@ const TableList: React.FC = (props: { category?: string }) => {
         onFinish={async (value) => {
           let success;
           const { id } = currentRow;
-          success = await handleUpdateFields({ id, ...value, } as API.RuleListItem);
+          success = await handleUpdateFields({ id, fields: dataSource, } as API.RuleListItem);
           if (success) {
             _action_modal_1(false);
             if (actionRef.current) {
@@ -431,129 +491,31 @@ const TableList: React.FC = (props: { category?: string }) => {
           }
         }}
       >
-        <Row gutter={10} style={{ backgroundColor: '#fafafa', borderRadius: '8px', border: '1px solid #d9d9d9', padding: '12px', boxSizing: 'border-box', marginBottom: '12px', marginRight: '39px' }} >
-          <Col span={3} >
-            字段(英文)
-          </Col>
-          <Col span={3}>
-            字段名(中文)
-          </Col>
-          <Col span={3}>
-            备注
-          </Col>
-          <Col span={3}>
-            类型
-          </Col>
-          <Col span={2}>
-            长度
-          </Col>
-          <Col span={2}>
-            精度
-          </Col>
-          <Col span={3}>
-            是否不能为空
-          </Col>
-          <Col span={3}>
-            是否分区字段
-          </Col>
-          <Col span={2}>
-            是否主键
-          </Col>
-        </Row>
-        <ProFormList
-          name="fields"
-          initialValue={currentRow.fields}
-          creatorButtonProps={{
+        <EditableProTable
+          rowKey="index"
+          scroll={{
+            y: 400,
+          }}
+          recordCreatorProps={{
             position: 'bottom',
-            creatorButtonText: '再建一个字段',
-            style: {
-              position: 'absolute',
-              bottom: '-19px',
-              left: '-5px',
-              width: 'calc(100% - 34px)'
-            }
+            record: () => ({ index: dataSource.length }),
           }}
-          className='scroll-list'
-          creatorRecord={{
-            "id": "",
-            "modelId": "",
-            "name": "",
-            "alias": "",
-            "description": "",
-            "type": "",
-            "precision": null,
-            "scale": null,
-            "nullable": false,
-            "primaryKey": false,
-            "partitionKey": false
+          loading={false}
+          columns={columns1}
+          request={async () => ({
+            data: currentRow.fields,
+            total: currentRow.fields?.length ?? 0,
+            success: true,
+          })}
+          value={dataSource}
+          onChange={setDataSource}
+          editable={{
+            type: 'multiple',
+            onSave: async (rowKey, data, row) => {
+              console.log(rowKey, data, row);
+            },
           }}
-        >
-          <Row gutter={10} style={{ backgroundColor: '#fafafa', borderRadius: '8px', border: '1px solid #d9d9d9', padding: '12px', boxSizing: 'border-box', marginBottom: '12px' }} >
-            <Col span={3} >
-              <ProFormText
-                key="name"
-                name="name"
-                placeholder="请输入字段(英文)"
-              />
-            </Col>
-            <Col span={3}>
-              <ProFormText
-                key="alias"
-                name="alias"
-                placeholder="请输入字段名(中文)"
-              />
-            </Col>
-            <Col span={3}>
-              <ProFormTextArea
-                key="description"
-                name="description"
-                placeholder="请输入备注"
-                fieldProps={{
-                  rows: 1,
-                }}
-              />
-            </Col>
-            <Col span={3}>
-              <ProFormTreeSelect
-                name='type'
-                placeholder="请选择类型"
-                request={async () => await _.map(field_type_dict, (v) => ({ label: v, value: v }))}
-              />
-            </Col>
-            <Col span={2}>
-              <ProFormDigit
-                key="precision"
-                name="precision"
-                placeholder="请输入长度"
-              />
-            </Col>
-            <Col span={2}>
-              <ProFormDigit
-                key="scale"
-                name="scale"
-                placeholder="请输入精度"
-              />
-            </Col>
-            <Col span={3}>
-              <ProFormCheckbox
-                key="nullable"
-                name="nullable"
-              ></ProFormCheckbox>
-            </Col>
-            <Col span={3}>
-              <ProFormCheckbox
-                key="partitionKey"
-                name="partitionKey"
-              ></ProFormCheckbox>
-            </Col>
-            <Col span={2}>
-              <ProFormCheckbox
-                key="primaryKey"
-                name="primaryKey"
-              ></ProFormCheckbox>
-            </Col>
-          </Row>
-        </ProFormList>
+        />
       </ModalForm>
       <Drawer
         width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}
