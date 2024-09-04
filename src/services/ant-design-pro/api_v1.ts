@@ -12,7 +12,7 @@ const listTransIn = (data: { [key: string]: any }) => {
   return {
     limit,
     search,
-    sort: '-createDate '
+    sort: '-createdDate'
   }
 }
 
@@ -225,6 +225,43 @@ const models = {
   },
 }
 
+const tasks = {
+  get: async (
+    data?: { [key: string]: any },
+  ) => {
+    return listTransOut(await request(`${baseUrl}/tasks?${(new URLSearchParams(listTransIn(data ?? {}))).toString()}`, {
+      method: 'GET',
+    }));
+  },
+  put: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/tasks/${data.id}`, {
+      method: 'PUT',
+      data
+    });
+  },
+  post: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/tasks`, {
+      method: 'POST',
+      data
+    });
+  },
+  delete: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/tasks/${data.id}`, {
+      method: 'DELETE',
+    });
+  },
+  enable: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/tasks/${data.id}/actions/enable`, {
+      method: 'POST',
+    });
+  },
+  disable: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/tasks/${data.id}/actions/disable`, {
+      method: 'POST',
+      data
+    });
+  }
+}
 
 export {
   roles,
@@ -233,4 +270,5 @@ export {
   dataSources,
   catalogs,
   models,
+  tasks,
 }

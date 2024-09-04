@@ -73,6 +73,12 @@ export default [
     component: './models/list',
   },
   {
+    path: '/tasks/list',
+    name: '数据汇聚',
+    icon: 'playCircle',
+    component: './tasks/list',
+  },
+  {
     path: '/xtgl',
     name: '系统管理',
     icon: 'setting',
@@ -89,7 +95,6 @@ export default [
         icon: 'database',
         component: './data-storage/index',
       },
-
       {
         path: 'xtrz/list',
         name: '系统日志',
