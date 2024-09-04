@@ -12,6 +12,7 @@ const listTransIn = (data: { [key: string]: any }) => {
   return {
     limit,
     search,
+    sort: '-createDate '
   }
 }
 

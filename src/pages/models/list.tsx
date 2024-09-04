@@ -153,7 +153,6 @@ const TableList: React.FC = (props: { category?: string }) => {
       pageSize: 1000,
     }).then((res) => {
       _columnType(res.data as [])
-      console.log(columnType, _.map(columnType, 'value'));
     })
   }, [])
 
