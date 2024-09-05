@@ -1,4 +1,4 @@
-import { catalogs } from '@/services/ant-design-pro/api_v1';
+import { catalogs, dict } from '@/services/ant-design-pro/api_v1';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ClockCircleOutlined, SyncOutlined, MinusCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, PlayCircleOutlined, HistoryOutlined, FieldTimeOutlined, StopOutlined, BranchesOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
@@ -123,6 +123,8 @@ const TableList: React.FC = (props: { category?: string }) => {
 
   const [state, _state] = useState({});
   const [datasource, _datasource] = useState([]);
+  const [CatalogType, _CatalogType] = useState([]);
+
 
   useEffect(() => {
     if (!createModalOpen) {
@@ -138,7 +140,15 @@ const TableList: React.FC = (props: { category?: string }) => {
     children: item.children && item.children.length > 0 ? transTreeData(item.children) : [],
   }))
 
-  const typeDict = ['DATA_SOURCE', 'DATA_STORAGE', 'DATA_DEV', 'MODEL', 'SERVICE']
+  useEffect(() => {
+    dict.get({
+      '**type': 'CatalogType',
+      current: 1,
+      pageSize: 1000,
+    }).then((res) => {
+      _CatalogType(_.map(res.data, ({ name, value }) => ({ label: name, value })))
+    })
+  }, [])
 
   /**
    * @en-US International configuration
@@ -170,7 +180,7 @@ const TableList: React.FC = (props: { category?: string }) => {
       colSize: 3,
       renderFormItem: ({ value, onChange }) => {
         return <Radio.Group
-          options={typeDict}
+          options={CatalogType}
           onChange={(...args) => {
             onChange?.(...args);
             _params({
