@@ -57,7 +57,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       if (menuItemProps.path && location.pathname !== menuItemProps.path) {
         return (
           // handle wildcard route path, for example /slave/* from qiankun
-          <Link to={menuItemProps.path.replace('/*', '')} target={menuItemProps.target}>
+          <Link to={(menuItemProps?.toPath ?? menuItemProps.path).replace('/*', '')} target={menuItemProps.target}>
             <div className='ant-pro-base-menu-inline-item-title'>
               {menuItemProps.pro_layout_parentKeys
                 && menuItemProps.pro_layout_parentKeys.length > 0 &&
@@ -66,6 +66,16 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
             </div>
           </Link>
         );
+      }
+      if (menuItemProps?.toPath) {
+        <Link to={menuItemProps?.toPath} target={menuItemProps.target}>
+          <div className='ant-pro-base-menu-inline-item-title'>
+            {menuItemProps.pro_layout_parentKeys
+              && menuItemProps.pro_layout_parentKeys.length > 0 &&
+              menuItemProps.icon}
+            {defaultDom}
+          </div>
+        </Link>
       }
       return <div className='ant-pro-base-menu-inline-item-title'>
         {menuItemProps.pro_layout_parentKeys
