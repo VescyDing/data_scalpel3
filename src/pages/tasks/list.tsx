@@ -25,7 +25,6 @@ import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col, S
 import React, { useRef, useState, useEffect } from 'react';
 import _ from 'lodash'
 import SearchTree from '@/components/SearchTree';
-import { data_source_type_icon, data_source_dict_name, field_type_dict } from './enum';
 
 const { Text } = Typography;
 
@@ -183,7 +182,6 @@ const TableList: React.FC = (props: { category?: string }) => {
   }
 
 
-  const dict_type_dom = _.map(data_source_type_icon, (v, k) => ({ label: v, value: k }))
   /**
    * @en-US International configuration
    * @zh-CN 国际化配置
@@ -267,7 +265,13 @@ const TableList: React.FC = (props: { category?: string }) => {
           key="edit"
           onClick={() => {
             setCurrentRow(record);
-            handleModalOpen(true);
+            // handleModalOpen(true);
+            switch (record.taskType) {
+              case 'BATCH_CANVAS':
+                break;
+              default:
+                break;
+            }
           }}
         >
           <BranchesOutlined /> 配置

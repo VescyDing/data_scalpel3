@@ -23,7 +23,7 @@ import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col, S
 import React, { useRef, useState, useEffect } from 'react';
 import _ from 'lodash'
 import SearchTree from '@/components/SearchTree';
-import { data_source_type_icon, data_source_dict_name, field_type_dict } from './enum';
+import { data_source_type_icon } from './enum';
 
 /**
  * @en-US Add node

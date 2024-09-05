@@ -119,6 +119,12 @@ export default [
         icon: 'user',
         component: './users/list',
       },
+      {
+        path: 'catalogs/list',
+        name: '目录管理',
+        icon: 'menuUnfold',
+        component: './catalogs/list',
+      },
     ],
   },
 
