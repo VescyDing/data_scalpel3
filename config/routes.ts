@@ -73,10 +73,20 @@ export default [
     component: './models/list',
   },
   {
-    path: '/tasks/list',
+    path: '/tasks',
+    toPath: '/tasks/list',
     name: '数据汇聚',
     icon: 'playCircle',
-    component: './tasks/list',
+    routes: [
+      {
+        path: 'list',
+        component: './tasks/list',
+      },
+      {
+        path: 'canvas/:id',
+        component: './tasks/canvas',
+      },
+    ]
   },
   {
     path: '/xtgl',

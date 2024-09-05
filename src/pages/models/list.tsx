@@ -357,7 +357,7 @@ const TableList: React.FC = (props: { category?: string }) => {
   return (
     <PageContainer>
       <Layout style={{ minHeight: '100%' }}>
-        <Layout.Sider width="25%" style={{ backgroundColor: 'rgba(255, 255, 255)', marginRight: '16px', borderRadius: '6px', padding: '16px', paddingTop: '24px' }} >
+        <Layout.Sider width="25%" className='white-block' style={{ marginRight: '16px', paddingTop: '24px' }} >
           <SearchTree treeData={catalogsTree} onSelect={onSelect} />
         </Layout.Sider>
         <Layout.Content >
