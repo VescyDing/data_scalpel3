@@ -260,7 +260,14 @@ const tasks = {
       method: 'POST',
       data
     });
-  }
+  },
+  detail: async (
+    data?: { [key: string]: any },
+  ) => {
+    return listTransOut(await request(`${baseUrl}/tasks/${data.id}`, {
+      method: 'GET',
+    }));
+  },
 }
 
 export {

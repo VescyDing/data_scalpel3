@@ -229,6 +229,7 @@ const TableList: React.FC = (props: { category?: string }) => {
     {
       title: '统计',
       dataIndex: 'successCount',
+      width: 100,
       search: false,
       render: (dom, entity) => <div><Text type="success">{entity?.successCount}</Text>/<Text type="danger">{entity?.failureCount}</Text></div>,
     },
@@ -244,12 +245,14 @@ const TableList: React.FC = (props: { category?: string }) => {
       title: '更新时间',
       dataIndex: 'lastModifiedDate',
       valueType: 'dateTime',
+      width: 130,
       search: false,
     },
     {
       title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
       dataIndex: 'option',
       valueType: 'option',
+      width: 300,
       render: (_, record) => [
         <Button
           type="link"
@@ -263,7 +266,7 @@ const TableList: React.FC = (props: { category?: string }) => {
         </Button>,
         <Button
           type="link"
-          key="edit"
+          key="canvas"
           onClick={() => {
             setCurrentRow(record);
             // handleModalOpen(true);
@@ -278,7 +281,7 @@ const TableList: React.FC = (props: { category?: string }) => {
         >
           <BranchesOutlined /> 配置
         </Button>,
-        <Switch checkedChildren="启用" unCheckedChildren="禁用" checked={record.status === 'ENABLE'} onChange={async v => {
+        <Switch key="switch" checkedChildren="启用" unCheckedChildren="禁用" checked={record.status === 'ENABLE'} onChange={async v => {
           const { id } = record;
           const hide = message.loading('正在' + (v ? '启用' : '禁用'));
           try {
