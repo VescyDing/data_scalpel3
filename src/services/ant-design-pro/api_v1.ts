@@ -147,6 +147,18 @@ const dataSources = {
       method: 'DELETE',
     });
   },
+  getItems: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/data-sources/${data.id}/actions/get-items`, {
+      method: 'POST',
+      data
+    });
+  },
+  getMetadata: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/data-sources/${data.id}/items/actions/get-metadata`, {
+      method: 'POST',
+      data
+    });
+  },
 }
 const catalogs = {
   get: async (

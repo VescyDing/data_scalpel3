@@ -190,8 +190,8 @@ export default () => {
                 "data": {
                     "name": "开始",
                     "type": "INPUT",
-                    "nodeType": "start",
-                    "checkStatus": "sucess"
+                    "nodeType": "Start",
+                    "status": "success"
                 }
             },
         ],
@@ -199,9 +199,9 @@ export default () => {
     })
     const params = useParams();
     useEffect(() => {
-        tasks.detail(params).then(res => {
-            console.log('res :>> ', res);
-        })
+        // tasks.detail(params).then(res => {
+        //     console.log('res :>> ', res);
+        // })
     }, [])
     return <PageContainer title='任务配置' breadcrumb={<Breadcrumb className='ant-page-header-breadcrumb' routes={[{ breadcrumbName: '数据汇聚' }, { breadcrumbName: '任务配置' }]} />} >
         <div id="minimap" style={{
