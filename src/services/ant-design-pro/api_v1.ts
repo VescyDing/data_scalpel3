@@ -276,9 +276,15 @@ const tasks = {
   detail: async (
     data?: { [key: string]: any },
   ) => {
-    return listTransOut(await request(`${baseUrl}/tasks/${data.id}`, {
+    return request(`${baseUrl}/tasks/${data.id}`, {
       method: 'GET',
-    }));
+    });
+  },
+  definition: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/tasks/${data.id}/definition`, {
+      method: 'PUT',
+      data
+    });
   },
 }
 

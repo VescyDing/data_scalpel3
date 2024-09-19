@@ -70,8 +70,8 @@ export default ({ data, menu, closeDrawer, callBack }) => {
                 item: name,
                 timeFieldName: _.find(itemData, { name })?.timeFieldName ?? null
             }))
-            configuration.strategy.startTime = configuration.strategy.startTime.format('YYYY-MM-DD HH:mm:ss')
-            configuration.strategy.endTime = configuration.strategy.endTime.format('YYYY-MM-DD HH:mm:ss')
+            configuration.strategy.startTime = configuration.strategy.startTime?.format?.('YYYY-MM-DD HH:mm:ss')
+            configuration.strategy.endTime = configuration.strategy.endTime?.format?.('YYYY-MM-DD HH:mm:ss')
             callBack({ configuration })
             closeDrawer()
         }
