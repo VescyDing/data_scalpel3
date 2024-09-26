@@ -286,6 +286,12 @@ const tasks = {
       data
     });
   },
+  preRun: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/tasks/actions/canvas-pre-run`, {
+      method: 'POST',
+      data
+    });
+  },
 }
 
 export {

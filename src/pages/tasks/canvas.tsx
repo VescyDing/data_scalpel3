@@ -33,13 +33,14 @@ export default () => {
                     "data": {
                         "name": "开始",
                         "type": ".start.Start",
-                        "status": "success"
+                        "status": "success",
+                        "category": "STARTER",
                     }
                 },
             ],
             lines: []
         }
-        const { definition } = res.data;
+        const definition = res?.data?.definition;
         _data(definition ?? JSON.stringify({ type: 'BATCH_CANVAS', canvas: JSON.stringify(canvas) }))
         hide()
     }, [])

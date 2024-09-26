@@ -20,7 +20,7 @@ import { Table, Select, Form, Popconfirm, Tag, Button } from 'antd';
 import { useRef, useEffect, useState, } from 'react';
 import _ from 'lodash'
 
-export default ({ data, menu, closeDrawer, callBack }) => {
+export default ({ data, menu, closeDrawer, callBack, deleteNode }) => {
     const formRef = useRef();
     const [itemData, _itemData] = useState([])
     const [loading, _loading] = useState(false)
@@ -46,7 +46,7 @@ export default ({ data, menu, closeDrawer, callBack }) => {
                 item: name,
             }))
             const res1 = await Promise.all(requests)
-            _itemData(_.map(res.data, (value, index) => ({ ...value, ...res1[index].data })))
+            _itemData(_.map(res.data, (value, index) => ({ ...value, ...res1[index].data, timeFieldName: _.find(changedValues?.configuration?.items, { item: res.data[index].name })?.timeFieldName })))
             _loading(false)
         }
         if (changedValues?.configuration?.strategy?.type) {
@@ -66,10 +66,13 @@ export default ({ data, menu, closeDrawer, callBack }) => {
         if (formRef?.current) {
             const data = await formRef.current.validateFields()
             const configuration = data.configuration;
-            configuration.items = _.map(selectedRowKeys, (name) => ({
-                item: name,
-                timeFieldName: _.find(itemData, { name })?.timeFieldName ?? null
-            }))
+            configuration.items = _.map(selectedRowKeys, (name) => {
+                const target = _.find(itemData, { name })
+                return {
+                    item: name,
+                    ...(target ?? {}),
+                }
+            })
             configuration.strategy.startTime = configuration.strategy.startTime?.format?.('YYYY-MM-DD HH:mm:ss')
             configuration.strategy.endTime = configuration.strategy.endTime?.format?.('YYYY-MM-DD HH:mm:ss')
             callBack({ configuration })
@@ -77,12 +80,22 @@ export default ({ data, menu, closeDrawer, callBack }) => {
         }
     }
 
+    useEffect(() => {
+        if (data?.configuration) {
+            onValuesChange(data)
+            setSelectedRowKeys(_.map(data.configuration.items, 'item'))
+        }
+    }, [])
+
     return <ProCard
         colSpan="580px"
         title={<div style={{ width: '100%' }}>
-            {data?.name}
-            <Button type="primary" style={{ float: 'right' }} onClick={onSubmit} >确定</Button>
-            <Button style={{ float: 'right', marginRight: '14px' }} onClick={() => closeDrawer()} >取消</Button>
+            {data.name}
+            <div style={{ float: 'right', display: 'flex', gap: '14px' }} >
+                <Button danger onClick={() => deleteNode(data.id)} >删除</Button>
+                <Button onClick={() => closeDrawer()} >取消</Button>
+                <Button type="primary" onClick={onSubmit} >确定</Button>
+            </div>
         </div>}
         tabs={{
             items: [

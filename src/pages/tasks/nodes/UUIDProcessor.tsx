@@ -21,17 +21,30 @@ import { Table, Select, Form, Popconfirm, Tag, Button } from 'antd';
 import { useRef, useEffect, useState, } from 'react';
 import _ from 'lodash'
 
-export default ({ data, menu, closeDrawer, callBack }) => {
+export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) => {
     const formRef = useRef();
     const [loading, _loading] = useState(false)
+    const [inputTables, _inputTables] = useState([])
 
-    if (!data?.configuration?.length) {
-        data.configuration = [{
-            table: null,
-            fieldName: null
-        }]
+
+    useEffect(() => {
+        getTables().then(tables => {
+            console.log(tables);
+            _inputTables(tables.inputTables)
+        })
+    }, [])
+
+    if (!data?.configuration?.actions?.length) {
+        data = {
+            configuration: {
+                actions: [{
+                    table: null,
+                    fieldName: null
+                }]
+            }
+        }
     }
-    console.log(data.configuration)
+
     const onValuesChange = async (changedValues) => {
     }
 
@@ -48,8 +61,11 @@ export default ({ data, menu, closeDrawer, callBack }) => {
         colSpan="580px"
         title={<div style={{ width: '100%' }}>
             {data?.name}
-            <Button type="primary" style={{ float: 'right' }} onClick={onSubmit} >确定</Button>
-            <Button style={{ float: 'right', marginRight: '14px' }} onClick={() => closeDrawer()} >取消</Button>
+            <div style={{ float: 'right', display: 'flex', gap: '14px' }} >
+                <Button danger onClick={() => deleteNode(data.id)} >删除</Button>
+                <Button onClick={() => closeDrawer()} >取消</Button>
+                <Button type="primary" onClick={onSubmit} >确定</Button>
+            </div>
         </div>}
         tabs={{
             items: [
@@ -66,17 +82,22 @@ export default ({ data, menu, closeDrawer, callBack }) => {
                             onValuesChange={onValuesChange}
                         >
                             <ProFormList
-                                name="configuration"
+                                name={["configuration", "actions"]}
                             >
                                 <ProFormGroup>
                                     <ProFormSelect
                                         name="table"
                                         label="数据表"
                                         rules={[{ required: true }]}
-                                        request={async () => {
-
+                                        fieldProps={{
+                                            options: _.map(inputTables, (({ name, alias, columns }) => ({
+                                                label: `${name} (${alias})`,
+                                                value: name,
+                                                columns,
+                                            }))),
+                                            popupMatchSelectWidth: false,
                                         }}
-                                        style={{ minWidth: '180px' }}
+                                        style={{ width: '180px' }}
                                     />
                                     <ProFormText name="fieldName" label="新增字段" rules={[{ required: true }]} style={{ minWidth: '180px' }} />
                                 </ProFormGroup>
