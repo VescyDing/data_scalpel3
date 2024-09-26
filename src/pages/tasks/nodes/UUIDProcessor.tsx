@@ -29,13 +29,14 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
 
     useEffect(() => {
         getTables().then(tables => {
-            console.log(tables);
             _inputTables(tables.inputTables)
         })
     }, [])
 
+    // 无数据时数据初始化
     if (!data?.configuration?.actions?.length) {
         data = {
+            ...data,
             configuration: {
                 actions: [{
                     table: null,
@@ -45,6 +46,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
         }
     }
 
+    // 表单联动、接口请求、回显数据设置
     const onValuesChange = async (changedValues) => {
     }
 
@@ -99,7 +101,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                                         }}
                                         style={{ width: '180px' }}
                                     />
-                                    <ProFormText name="fieldName" label="新增字段" rules={[{ required: true }]} style={{ minWidth: '180px' }} />
+                                    <ProFormText name="fieldName" label="新增字段" rules={[{ required: true }]} style={{ width: '180px' }} />
                                 </ProFormGroup>
                             </ProFormList>
                         </ProForm>

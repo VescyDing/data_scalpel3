@@ -14,35 +14,36 @@ export default () => {
     const [data, _data] = useState()
     const params = useParams();
 
-    useEffect(async () => {
+    useEffect(() => {
         const hide = message.loading('加载中...');
-        const res = await tasks.detail(params)
-        const canvas = {
-            nodes: [
-                {
-                    "id": startId,
-                    "shape": "data-processing-dag-node",
-                    "x": 0,
-                    "y": 100,
-                    "ports": [
-                        {
-                            "id": `${startId}-out`,
-                            "group": "out"
+        tasks.detail(params).then((res) => {
+            const canvas = {
+                nodes: [
+                    {
+                        "id": startId,
+                        "shape": "data-processing-dag-node",
+                        "x": 0,
+                        "y": 100,
+                        "ports": [
+                            {
+                                "id": `${startId}-out`,
+                                "group": "out"
+                            }
+                        ],
+                        "data": {
+                            "name": "开始",
+                            "type": ".start.Start",
+                            "status": "success",
+                            "category": "STARTER",
                         }
-                    ],
-                    "data": {
-                        "name": "开始",
-                        "type": ".start.Start",
-                        "status": "success",
-                        "category": "STARTER",
-                    }
-                },
-            ],
-            lines: []
-        }
-        const definition = res?.data?.definition;
-        _data(definition ?? JSON.stringify({ type: 'BATCH_CANVAS', canvas: JSON.stringify(canvas) }))
-        hide()
+                    },
+                ],
+                lines: []
+            }
+            const definition = res?.data?.definition;
+            _data(definition ?? JSON.stringify({ type: 'BATCH_CANVAS', canvas: JSON.stringify(canvas) }))
+            hide()
+        })
     }, [])
 
     const setData = async (__data: any) => {

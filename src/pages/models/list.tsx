@@ -92,8 +92,10 @@ const handleUpdateFields = async (fields: API.RuleListItem) => {
   }
 };
 
-const TableList: React.FC = (props: { category?: string }) => {
-  const { category = 'MODEL' } = props;
+const TableList: React.FC = (props: { category?: string, targetItemDetail?: any, sendSelected?: (model: any) => void }) => {
+  const { category = 'MODEL', targetItemDetail, sendSelected } = props;
+
+  const isAPickerComponent = !!sendSelected;
 
   /**
    * @en-US Pop-up window of new window
@@ -110,7 +112,7 @@ const TableList: React.FC = (props: { category?: string }) => {
 
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<API.RuleListItem>({});
-  const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
+  const [selectedRows, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
   const [catalogsTree, _catalogsTree] = useState([]);
   const [params, _params] = useState({});
@@ -155,6 +157,14 @@ const TableList: React.FC = (props: { category?: string }) => {
       _columnType(res.data as [])
     })
   }, [])
+
+
+  useEffect(() => {
+    if (isAPickerComponent) {
+      setSelectedRows(targetItemDetail ? [targetItemDetail] : [])
+    }
+  }, [targetItemDetail])
+
 
   const dict_state = {
     'DRAFT': <Tag icon={<QuestionCircleOutlined />} color="processing">
@@ -222,51 +232,53 @@ const TableList: React.FC = (props: { category?: string }) => {
       valueType: 'dateTime',
       search: false,
     },
-    {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
-      dataIndex: 'option',
-      valueType: 'option',
-      render: (_, record) => [
-        <Button
-          type="link"
-          key="edit"
-          onClick={() => {
-            setCurrentRow(record);
-            handleModalOpen(true);
-          }}
-        >
-          <EditOutlined /> 编辑
-        </Button>,
-        <Button
-          type="link"
-          key="edit_action_1"
-          onClick={async () => {
-            const hide = message.loading('获取字段中');
-            const res = await models.getFields({ id: record.id });
-            hide();
-            setCurrentRow({ ...record, fields: res.data });
-            _action_modal_1(true);
-          }}
-        >
-          <HighlightOutlined /> 编辑字段
-        </Button>,
-        <Switch checkedChildren="在线" unCheckedChildren="下线" checked={record.state === 'ONLINE'} onChange={async v => {
-          const { id } = record;
-          const hide = message.loading('正在' + (v ? '上线' : '下线'));
-          try {
-            await (v ? models.online({ id }) : models.offline({ id }));
-            hide();
-            message.success((v ? '上线' : '下线') + '成功');
-            if (actionRef.current) {
-              actionRef.current.reload();
+    ...(isAPickerComponent ? [] : [
+      {
+        title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
+        dataIndex: 'option',
+        valueType: 'option',
+        render: (_, record) => [
+          <Button
+            type="link"
+            key="edit"
+            onClick={() => {
+              setCurrentRow(record);
+              handleModalOpen(true);
+            }}
+          >
+            <EditOutlined /> 编辑
+          </Button>,
+          <Button
+            type="link"
+            key="edit_action_1"
+            onClick={async () => {
+              const hide = message.loading('获取字段中');
+              const res = await models.getFields({ id: record.id });
+              hide();
+              setCurrentRow({ ...record, fields: res.data });
+              _action_modal_1(true);
+            }}
+          >
+            <HighlightOutlined /> 编辑字段
+          </Button>,
+          <Switch checkedChildren="在线" unCheckedChildren="下线" checked={record.state === 'ONLINE'} onChange={async v => {
+            const { id } = record;
+            const hide = message.loading('正在' + (v ? '上线' : '下线'));
+            try {
+              await (v ? models.online({ id }) : models.offline({ id }));
+              hide();
+              message.success((v ? '上线' : '下线') + '成功');
+              if (actionRef.current) {
+                actionRef.current.reload();
+              }
+              return true;
+            } catch (error) {
+              return false;
             }
-            return true;
-          } catch (error) {
-            return false;
-          }
-        }} />,
-      ],
-    },
+          }} />,
+        ],
+      },
+    ]) as any,
   ];
 
   const columns1: ProColumns<API.RuleListItem>[] = [
@@ -354,223 +366,228 @@ const TableList: React.FC = (props: { category?: string }) => {
     _params(args[0][0] ? { '**catalogId': args[0][0], } : {})
   }
 
-  return (
-    <PageContainer>
-      <Layout style={{ minHeight: '100%' }}>
-        <Layout.Sider width="25%" className='white-block' style={{ marginRight: '16px', paddingTop: '24px' }} >
-          <SearchTree treeData={catalogsTree} onSelect={onSelect} />
-        </Layout.Sider>
-        <Layout.Content >
-          <ProTable<API.RuleListItem, API.PageParams>
-            headerTitle={intl.formatMessage({
-              id: 'pages.searchTable.title',
-              defaultMessage: 'Enquiry form',
-            })}
-            actionRef={actionRef}
-            rowKey="id"
-            search={{
-              labelWidth: 120,
-              defaultCollapsed: false,
-            }}
-            toolBarRender={() => [
-              <Button
-                key="primary"
-                onClick={() => {
-                  handleModalOpen(true);
-                }}
-              >
-                <PlusOutlined />新建
-              </Button>,
-            ]}
-            params={params}
-            request={models.get}
-            columns={columns}
-            rowSelection={{
-              onChange: (_, selectedRows) => {
-                setSelectedRows(selectedRows);
-              },
-            }}
-          />
-        </Layout.Content>
-      </Layout>
-
-      {selectedRowsState?.length > 0 && (
-        <FooterToolbar
-          extra={
-            <div>
-              <FormattedMessage id="pages.searchTable.chosen" defaultMessage="Chosen" />{' '}
-              <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>{' '}
-              <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
-            </div>
-          }
-        >
+  const content = <Layout style={{ minHeight: '100%' }}>
+    <Layout.Sider width="25%" className='white-block' style={{ marginRight: '16px', paddingTop: '24px' }} >
+      <SearchTree treeData={catalogsTree} onSelect={onSelect} />
+    </Layout.Sider>
+    <Layout.Content >
+      <ProTable<API.RuleListItem, API.PageParams>
+        headerTitle={intl.formatMessage({
+          id: 'pages.searchTable.title',
+          defaultMessage: 'Enquiry form',
+        })}
+        actionRef={actionRef}
+        rowKey="id"
+        search={{
+          labelWidth: 120,
+          defaultCollapsed: false,
+        }}
+        toolBarRender={() => isAPickerComponent ? [] : [
           <Button
-            danger
-            onClick={async () => {
-              await handleRemove(selectedRowsState);
-              setSelectedRows([]);
-              actionRef.current?.reloadAndRest?.();
+            key="primary"
+            onClick={() => {
+              handleModalOpen(true);
             }}
           >
-            <DeleteOutlined />
-            <FormattedMessage
-              id="pages.searchTable.batchDeletion"
-              defaultMessage="Batch deletion"
-            />
-          </Button>
-        </FooterToolbar>
-      )}
-      <ModalForm
-        title={(currentRow?.id ? '编辑' : '新建') + '模型'}
-        width="400px"
-        open={createModalOpen}
-        onOpenChange={handleModalOpen}
-        modalProps={{
-          destroyOnClose: true,
-        }}
-        initialValues={currentRow}
-        onFinish={async (value) => {
-          let success;
-          const { id } = currentRow;
-          if (id) {
-            success = await handleUpdate({ id, ...value, } as API.RuleListItem);
-          } else {
-            success = await handleAdd({ ...value, } as API.RuleListItem);
-          }
-          if (success) {
-            handleModalOpen(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
+            <PlusOutlined />新建
+          </Button>,
+        ]}
+        params={params}
+        request={models.get}
+        columns={columns}
+        rowSelection={{
+          type: isAPickerComponent ? 'radio' : 'checkbox',
+          onChange: (_, selectedRows) => {
+            if (sendSelected) {
+              sendSelected(selectedRows[0]);
+            } else {
+              setSelectedRows(selectedRows);
             }
-          }
+          },
+          selectedRowKeys: _.map(selectedRows, 'id'),
         }}
+      />
+    </Layout.Content>
+  </Layout>
+
+  return isAPickerComponent ? content : <PageContainer>
+    {content}
+
+    {!isAPickerComponent && selectedRows?.length > 0 && (
+      <FooterToolbar
+        extra={
+          <div>
+            <FormattedMessage id="pages.searchTable.chosen" defaultMessage="Chosen" />{' '}
+            <a style={{ fontWeight: 600 }}>{selectedRows.length}</a>{' '}
+            <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
+          </div>
+        }
       >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-          width="md"
-          name="name"
-          label="名称"
-        />
-        <ProFormText
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-          width="md"
-          name="alias"
-          label="别名"
-        />
-        <ProFormTreeSelect
-          name='catalogId'
-          width="md"
-          label="挂载目录"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-          request={async () => await catalogsTree}
-        />
-        <ProFormSelect
-          name='datasourceId'
-          width="md"
-          label="存储"
-          showSearch
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-          request={async () => await datasource}
-        />
-        <ProFormTextArea
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-          width="md"
-          name="description"
-          label="描述"
-        />
-      </ModalForm>
-      <ModalForm
-        title={'编辑模型字段'}
-        width="1200px"
-        open={action_modal_1}
-        onOpenChange={_action_modal_1}
-        modalProps={{
-          destroyOnClose: true,
-        }}
-        initialValues={currentRow}
-        onFinish={async (value) => {
-          let success;
-          const { id } = currentRow;
-          success = await handleUpdateFields({ id, fields: dataSource, } as API.RuleListItem);
-          if (success) {
-            _action_modal_1(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-      >
-        <EditableProTable
-          rowKey="index"
-          scroll={{
-            y: 400,
+        <Button
+          danger
+          onClick={async () => {
+            await handleRemove(selectedRows);
+            setSelectedRows([]);
+            actionRef.current?.reloadAndRest?.();
           }}
-          recordCreatorProps={{
-            position: 'bottom',
-            record: () => ({ index: dataSource.length }),
-          }}
-          loading={false}
-          columns={columns1}
-          request={async () => ({
-            data: currentRow.fields,
-            total: currentRow.fields?.length ?? 0,
-            success: true,
-          })}
-          value={dataSource}
-          onChange={setDataSource}
-          editable={{
-            type: 'multiple',
-            onSave: async (rowKey, data, row) => {
-              console.log(rowKey, data, row);
-            },
-          }}
-        />
-      </ModalForm>
-      <Drawer
-        width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}
-        open={showDetail}
-        onClose={() => {
-          setCurrentRow(undefined);
-          setShowDetail(false);
-        }}
-        closable={false}
-      >
-        {currentRow?.name && (
-          <ProDescriptions<API.RuleListItem>
-            column={1}
-            title={currentRow?.name}
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            params={{
-              id: currentRow?.name,
-            }}
-            columns={[...columns, ...detail_columns] as ProDescriptionsItemProps<API.RuleListItem>[]}
+        >
+          <DeleteOutlined />
+          <FormattedMessage
+            id="pages.searchTable.batchDeletion"
+            defaultMessage="Batch deletion"
           />
-        )}
-      </Drawer>
-    </PageContainer>
-  );
+        </Button>
+      </FooterToolbar>
+    )}
+    <ModalForm
+      title={(currentRow?.id ? '编辑' : '新建') + '模型'}
+      width="400px"
+      open={createModalOpen}
+      onOpenChange={handleModalOpen}
+      modalProps={{
+        destroyOnClose: true,
+      }}
+      initialValues={currentRow}
+      onFinish={async (value) => {
+        let success;
+        const { id } = currentRow;
+        if (id) {
+          success = await handleUpdate({ id, ...value, } as API.RuleListItem);
+        } else {
+          success = await handleAdd({ ...value, } as API.RuleListItem);
+        }
+        if (success) {
+          handleModalOpen(false);
+          if (actionRef.current) {
+            actionRef.current.reload();
+          }
+        }
+      }}
+    >
+      <ProFormText
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+        width="md"
+        name="name"
+        label="名称"
+      />
+      <ProFormText
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+        width="md"
+        name="alias"
+        label="别名"
+      />
+      <ProFormTreeSelect
+        name='catalogId'
+        width="md"
+        label="挂载目录"
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+        request={async () => await catalogsTree}
+      />
+      <ProFormSelect
+        name='datasourceId'
+        width="md"
+        label="存储"
+        showSearch
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+        request={async () => await datasource}
+      />
+      <ProFormTextArea
+        rules={[
+          {
+            required: true,
+          },
+        ]}
+        width="md"
+        name="description"
+        label="描述"
+      />
+    </ModalForm>
+    <ModalForm
+      title={'编辑模型字段'}
+      width="1200px"
+      open={action_modal_1}
+      onOpenChange={_action_modal_1}
+      modalProps={{
+        destroyOnClose: true,
+      }}
+      initialValues={currentRow}
+      onFinish={async (value) => {
+        let success;
+        const { id } = currentRow;
+        success = await handleUpdateFields({ id, fields: dataSource, } as API.RuleListItem);
+        if (success) {
+          _action_modal_1(false);
+          if (actionRef.current) {
+            actionRef.current.reload();
+          }
+        }
+      }}
+    >
+      <EditableProTable
+        rowKey="index"
+        scroll={{
+          y: 400,
+        }}
+        recordCreatorProps={{
+          position: 'bottom',
+          record: () => ({ index: dataSource.length }),
+        }}
+        loading={false}
+        columns={columns1}
+        request={async () => ({
+          data: currentRow.fields,
+          total: currentRow.fields?.length ?? 0,
+          success: true,
+        })}
+        value={dataSource}
+        onChange={setDataSource}
+        editable={{
+          type: 'multiple',
+          onSave: async (rowKey, data, row) => {
+          },
+        }}
+      />
+    </ModalForm>
+    <Drawer
+      width={document.body.clientWidth <= 500 ? 380 : document.body.clientWidth * 0.3}
+      open={showDetail}
+      onClose={() => {
+        setCurrentRow(undefined);
+        setShowDetail(false);
+      }}
+      closable={false}
+    >
+      {currentRow?.name && (
+        <ProDescriptions<API.RuleListItem>
+          column={1}
+          title={currentRow?.name}
+          request={async () => ({
+            data: currentRow || {},
+          })}
+          params={{
+            id: currentRow?.name,
+          }}
+          columns={[...columns, ...detail_columns] as ProDescriptionsItemProps<API.RuleListItem>[]}
+        />
+      )}
+    </Drawer>
+  </PageContainer>
 };
 
 export default TableList;

@@ -33,6 +33,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode }) => {
         tableNames: [],
     });
 
+    // 表单联动、接口请求、回显数据设置
     const onValuesChange = async (changedValues) => {
         if (changedValues?.configuration?.datasourceId) {
             _loading(true)
@@ -40,7 +41,6 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode }) => {
                 id: changedValues?.configuration.datasourceId,
                 type: 'JDBC_TABLE'
             })
-            // _itemData(_.map(res.data, ({ name }) => ({ label: `${name}`, value: name })))
             const requests = _.map(res.data, async ({ name }) => await dataSources.getMetadata({
                 id: changedValues?.configuration.datasourceId,
                 item: name,
@@ -173,32 +173,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode }) => {
                                     }
                                 }}
                             </ProFormDependency>
-                            {/* <ProFormDependency name={['configuration']}>
-                                {({ configuration }) => {
-                                    return <ProFormSelect
-                                        name={['configuration', 'datasourceItemId']}
-                                        // width="md"
-                                        label="来源表"
-                                        rules={[{ required: true }]}
-                                        disabled={loading || !itemData.length}
-                                        mode="multiple"
-                                        onChange={(value) => {
-                                            _tableData(_.map(value, (tableName) => {
-                                                if (_.find(tableData, { tableName })) {
-                                                    return _.find(tableData, { tableName })
-                                                } else {
-                                                    return { tableName }
-                                                }
-                                            }))
-                                        }}
-                                        fieldProps={{
-                                            loading,
-                                            options: itemData,
-                                        }}
-                                    />
-                                }}
-                            </ProFormDependency> */}
-                            <Form.Item label='来源表' >
+                            <Form.Item label='来源表'>
                                 <Popconfirm
                                     title='自动补全可用'
                                     description={<div>
