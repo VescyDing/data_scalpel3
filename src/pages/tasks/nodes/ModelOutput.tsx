@@ -1,4 +1,4 @@
-import { dataSources } from '@/services/ant-design-pro/api_v1';
+import { models } from '@/services/ant-design-pro/api_v1';
 import {
     ProForm,
     ProFormCascader,
@@ -16,21 +16,33 @@ import {
     ProFormDependency,
     ProFormDateTimePicker,
     ProFormGroup,
+    ModalForm,
 } from '@ant-design/pro-components';
 import { Table, Select, Form, Popconfirm, Tag, Button, Modal, Space } from 'antd';
+import { SwapOutlined } from '@ant-design/icons';
 import { useRef, useEffect, useState, } from 'react';
 import _ from 'lodash'
 import ModelTable from '@/pages/models/list';
 
 export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) => {
     const formRef = useRef();
+    const modalFormRef = useRef();
+
     const [loading, _loading] = useState(false)
     const [proTem, _proTem] = useState(null)
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-    const [open, setOpen] = useState<{ open: boolean, callback?: (args: any) => any, targetItemId?: string, }>({
+    const [open, setOpen] = useState<{ open: boolean, index: number }>({
         open: false,
-        callback: a => a,
-        targetItemId: undefined,
+        index: 0,
+    });
+    const [open2, setOpen2] = useState({
+        open: false,
+        index: 0,
+        FL: [],
+        FR: [],
+        FT: '',
+        RT: '',
+        fieldMappings: [],
     });
     const [inputTables, _inputTables] = useState([])
 
@@ -52,14 +64,6 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
     const onValuesChange = async (changedValues) => {
 
     }
-
-    // rowSelection object indicates the need for row selection
-    const rowSelection = {
-        onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-            setSelectedRowKeys(selectedRowKeys)
-        },
-        selectedRowKeys,
-    };
 
     const onSubmit = async () => {
         if (formRef?.current) {
@@ -122,7 +126,9 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                                         },
                                     ]}
                                 />
-                                <Form.Item label='配置映射'></Form.Item>
+                                <div style={{ marginBottom: 24 }} >
+                                    配置映射
+                                </div>
                                 <ProFormList
                                     name={["configuration", "mappings"]}
                                 >
@@ -133,10 +139,9 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                                                 label="输入表"
                                                 rules={[{ required: true }]}
                                                 fieldProps={{
-                                                    options: _.map(inputTables, (({ name, alias, columns }) => ({
+                                                    options: _.map(inputTables, (({ name, alias }) => ({
                                                         label: `${name} (${alias})`,
                                                         value: name,
-                                                        columns,
                                                     }))),
                                                     popupMatchSelectWidth: false,
                                                 }}
@@ -151,12 +156,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                                                             _proTem(current?.targetItemDetail)
                                                             setOpen({
                                                                 open: true,
-                                                                callback: (model: any) => {
-                                                                    const mappings = formData?.configuration?.mappings ?? [];
-                                                                    mappings[index].targetItem = model.id;
-                                                                    mappings[index].targetItemDetail = model;
-                                                                    args[1].setFieldValue('configuration.mappings', mappings)
-                                                                },
+                                                                index: index,
                                                             })
                                                         }}>
                                                             <span style={{ width: 90, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} >{current?.targetItem ? current.targetItemDetail?.name : '设置模型'}</span>
@@ -169,17 +169,33 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                                                     {(...args) => {
                                                         const formData = args[1].getFieldsValue();
                                                         const current = formData?.configuration?.mappings?.[index];
-                                                        return <div style={{ width: '86px' }} >0/{current?.targetItemDetail?.recordCount ?? 0}</div>
+                                                        return <div style={{ width: '86px' }} >{current?.setCount ?? 0}/{current?.targetItemDetail?.recordCount ?? 0}</div>
                                                     }}
                                                 </ProFormDependency>
                                             </Form.Item>
                                             <Form.Item label='操作'>
-                                                <ProFormDependency name={[]}>
+                                                <ProFormDependency name={['sourceTable']}>
                                                     {(...args) => {
                                                         const formData = args[1].getFieldsValue();
                                                         const current = formData?.configuration?.mappings?.[index];
                                                         return <div>
-                                                            <Button type="link" style={{ padding: 0, marginRight: 14 }} >字段映射</Button>
+                                                            <Button type="link" style={{ padding: 0, marginRight: 14 }} disabled={!(current?.sourceTable && current?.targetItem)} onClick={async () => {
+                                                                const FL = _.find(inputTables, { name: current?.sourceTable })
+                                                                const FR = await models.getFields({ id: current?.targetItem })
+                                                                const fieldMappings = current?.fieldMappings?.length ? current?.fieldMappings : _.map(FL?.columns, ({ name }) => ({
+                                                                    sourceFieldName: name,
+                                                                    targetFieldName: null,
+                                                                }))
+                                                                setOpen2({
+                                                                    open: true,
+                                                                    index: index,
+                                                                    FL: FL?.columns ?? [],
+                                                                    FR: FR?.data ?? [],
+                                                                    fieldMappings,
+                                                                    FT: current?.sourceTable,
+                                                                    RT: current?.targetItemDetail?.name,
+                                                                })
+                                                            }} >字段映射</Button>
                                                             <Button type="link" disabled style={{ padding: 0 }} >高级</Button>
                                                         </div>
                                                     }}
@@ -196,12 +212,16 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
         />
         <Modal width='80%' centered title="勾选以选择模型" open={open.open}
             footer={[
-                <Button key="cancel" onClick={() => setOpen({ open: false, callback: undefined, targetItemId: undefined, })}>
+                <Button key="cancel" onClick={() => setOpen({ open: false, index: 0, })}>
                     取消
                 </Button>,
                 <Button disabled={!proTem} key="confirm" type="primary" loading={loading} onClick={() => {
-                    open?.callback?.(proTem)
-                    setOpen({ open: false, callback: undefined, targetItemId: undefined, })
+                    const formData = formRef.current?.getFieldsValue();
+                    const mappings = formData?.configuration?.mappings ?? [];
+                    mappings[open.index].targetItem = proTem?.id;
+                    mappings[open.index].targetItemDetail = proTem;
+                    formRef.current?.setFieldValue('configuration.mappings', mappings)
+                    setOpen({ open: false, index: 0, })
                 }}>
                     确定
                 </Button>,
@@ -209,6 +229,90 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
         >
             <ModelTable targetItemDetail={proTem} sendSelected={(model) => { _proTem(model) }} />
         </Modal>
+        <ModalForm
+            title="字段映射"
+            width='40%'
+            open={open2.open}
+            onOpenChange={v => setOpen2({ ...open2, open: v, })}
+            modalProps={{
+                destroyOnClose: true,
+                centered: true,
+            }}
+            onFinish={async (value) => {
+                const formData = formRef.current?.getFieldsValue();
+                const mappings = formData?.configuration?.mappings ?? [];
+                mappings[open2.index].fieldMappings = open2.fieldMappings;
+                mappings[open2.index].setCount = _.reduce(open2.fieldMappings, function (sum, item) {
+                    if (item.targetFieldName) {
+                        return sum + 1;
+                    } else {
+                        return sum;
+                    }
+                }, 0)
+                formRef.current?.setFieldValue('configuration.mappings', mappings)
+                setOpen2({ open: false, index: 0, })
+            }}
+            formRef={modalFormRef}
+        >
+            <Table
+                rowKey='sourceFieldName'
+                columns={[{
+                    title: `来源字段 (来源表: ${open2.FT})`,
+                    dataIndex: 'sourceFieldName',
+                }, {
+                    title: `目标字段 (目标模型: ${open2.RT})`,
+                    dataIndex: 'targetFieldName',
+                    render: (__, record, index) => <Select
+                        key={index + record.targetFieldName}
+                        options={_.map(open2.FR, (({ name, alias }) => ({
+                            label: `${name} (${alias})`,
+                            value: name,
+                        })))}
+                        popupMatchSelectWidth={false}
+                        style={{ width: '100%' }}
+                        value={record.targetFieldName}
+                        onChange={(v) => {
+                            // record.targetFieldName = v;
+                            setOpen2({
+                                ...open2,
+                                fieldMappings: open2.fieldMappings.map((item, i) => {
+                                    if (i == index) {
+                                        return { ...item, targetFieldName: v }
+                                    } else {
+                                        return item
+                                    }
+                                })
+                            })
+                        }}
+                    />
+                }]}
+                size='small'
+                style={{ marginTop: 16 }}
+                bordered
+                scroll={{ y: 490 }}
+                pagination={{ pageSize: 10, position: ['bottomLeft'] }}
+                dataSource={open2.fieldMappings}
+            />
+            <Button type='dashed' danger style={{ position: 'absolute', bottom: 75, right: 24 }} onClick={() => {
+                Modal.confirm({
+                    title: '智能匹配',
+                    content: '智能匹配将会遍历所有来源字段和目标字段，并将忽略大小写、空格、分隔符、驼峰等差异，进行对比，如果结果相等，将会自动为目标字段填入对应值。此操作将会覆盖之前所有已经做过的设置，所以请在最开始设置时使用此功能，是否继续？',
+                    onOk: () => {
+                        _.each(open2.fieldMappings, item => {
+                            if (item.sourceFieldName) {
+                                const target = _.find(open2.FR, ({ name }) => {
+                                    console.log('object :>> ', _.camelCase(name), _.camelCase(item.sourceFieldName));
+                                    return _.camelCase(name) == _.camelCase(item.sourceFieldName)
+                                });
+                                if (target) {
+                                    item.targetFieldName = target.name;
+                                }
+                            }
+                        })
+                    }
+                })
+            }} >智能匹配</Button>
+        </ModalForm>
     </>
 
 }
