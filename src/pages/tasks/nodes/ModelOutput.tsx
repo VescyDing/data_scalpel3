@@ -70,8 +70,6 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
             const data = await formRef.current.validateFields()
             const configuration = data.configuration;
 
-            configuration.strategy.startTime = configuration.strategy.startTime?.format?.('YYYY-MM-DD HH:mm:ss')
-            configuration.strategy.endTime = configuration.strategy.endTime?.format?.('YYYY-MM-DD HH:mm:ss')
             callBack({ configuration })
             closeDrawer()
         }
@@ -169,7 +167,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                                                     {(...args) => {
                                                         const formData = args[1].getFieldsValue();
                                                         const current = formData?.configuration?.mappings?.[index];
-                                                        return <div style={{ width: '86px' }} >{current?.setCount ?? 0}/{current?.targetItemDetail?.recordCount ?? 0}</div>
+                                                        return <div style={{ width: '86px' }} >{current?.setCount ?? 0}/{current?.allCount ?? 0}</div>
                                                     }}
                                                 </ProFormDependency>
                                             </Form.Item>
@@ -220,6 +218,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                     const mappings = formData?.configuration?.mappings ?? [];
                     mappings[open.index].targetItem = proTem?.id;
                     mappings[open.index].targetItemDetail = proTem;
+                    mappings[open.index].allCount = proTem?.recordCount;
                     formRef.current?.setFieldValue('configuration.mappings', mappings)
                     setOpen({ open: false, index: 0, })
                 }}>
@@ -250,7 +249,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                     }
                 }, 0)
                 formRef.current?.setFieldValue('configuration.mappings', mappings)
-                setOpen2({ open: false, index: 0, })
+                setOpen2({ ...open2, open: false, index: 0, })
             }}
             formRef={modalFormRef}
         >
@@ -301,7 +300,6 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                         _.each(open2.fieldMappings, item => {
                             if (item.sourceFieldName) {
                                 const target = _.find(open2.FR, ({ name }) => {
-                                    console.log('object :>> ', _.camelCase(name), _.camelCase(item.sourceFieldName));
                                     return _.camelCase(name) == _.camelCase(item.sourceFieldName)
                                 });
                                 if (target) {
