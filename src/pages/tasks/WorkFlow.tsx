@@ -9,7 +9,9 @@ import {
     AimOutlined,
     UndoOutlined,
     RedoOutlined,
+    VerticalRightOutlined,
 } from '@ant-design/icons';
+import { history } from '@umijs/max';
 import { Snapline } from '@antv/x6-plugin-snapline'
 import { Keyboard } from '@antv/x6-plugin-keyboard'
 import { Clipboard } from '@antv/x6-plugin-clipboard'
@@ -859,6 +861,7 @@ export default (props: { data: any, setData: any }) => {
             <Button icon={<AimOutlined />} onClick={() => graph.zoomToFit()} >定位</Button>
             <Button icon={<UndoOutlined />} onClick={onUndo} disabled={!canDo?.canUndo} >撤销</Button>
             <Button icon={<RedoOutlined />} onClick={onRedo} disabled={!canDo?.canRedo}>重做</Button>
+            <Button type='primary' icon={<VerticalRightOutlined />} onClick={() => history.go(-1)} >返回</Button>
             {/* <Button>整理</Button> */}
         </Flex>
         <div id='workFlow'>

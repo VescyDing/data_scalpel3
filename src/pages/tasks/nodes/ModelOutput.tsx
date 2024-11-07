@@ -180,9 +180,9 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                                                             <Button type="link" style={{ padding: 0, marginRight: 14 }} disabled={!(current?.sourceTable && current?.targetItem)} onClick={async () => {
                                                                 const FL = _.find(inputTables, { name: current?.sourceTable })
                                                                 const FR = await models.getFields({ id: current?.targetItem })
-                                                                const fieldMappings = current?.fieldMappings?.length ? current?.fieldMappings : _.map(FL?.columns, ({ name }) => ({
-                                                                    sourceFieldName: name,
-                                                                    targetFieldName: null,
+                                                                const fieldMappings = current?.fieldMappings?.length ? current?.fieldMappings : _.map(FR?.data, ({ name }) => ({
+                                                                    sourceFieldName: null,
+                                                                    targetFieldName: name,
                                                                 }))
                                                                 setOpen2({
                                                                     open: true,
@@ -254,29 +254,28 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
             formRef={modalFormRef}
         >
             <Table
-                rowKey='sourceFieldName'
+                rowKey='targetFieldName'
                 columns={[{
-                    title: `来源字段 (来源表: ${open2.FT})`,
-                    dataIndex: 'sourceFieldName',
-                }, {
                     title: `目标字段 (目标模型: ${open2.RT})`,
                     dataIndex: 'targetFieldName',
+                }, {
+                    title: `来源字段 (来源表: ${open2.FT})`,
+                    dataIndex: 'sourceFieldName',
                     render: (__, record, index) => <Select
-                        key={index + record.targetFieldName}
-                        options={_.map(open2.FR, (({ name, alias }) => ({
+                        key={index + record.sourceFieldName}
+                        options={_.map(open2.FL, (({ name, alias }) => ({
                             label: `${name} (${alias})`,
                             value: name,
                         })))}
                         popupMatchSelectWidth={false}
                         style={{ width: '100%' }}
-                        value={record.targetFieldName}
+                        value={record.sourceFieldName}
                         onChange={(v) => {
-                            // record.targetFieldName = v;
                             setOpen2({
                                 ...open2,
                                 fieldMappings: open2.fieldMappings.map((item, i) => {
                                     if (i == index) {
-                                        return { ...item, targetFieldName: v }
+                                        return { ...item, sourceFieldName: v }
                                     } else {
                                         return item
                                     }
@@ -297,16 +296,18 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                     title: '智能匹配',
                     content: '智能匹配将会遍历所有来源字段和目标字段，并将忽略大小写、空格、分隔符、驼峰等差异，进行对比，如果结果相等，将会自动为目标字段填入对应值。此操作将会覆盖之前所有已经做过的设置，所以请在最开始设置时使用此功能，是否继续？',
                     onOk: () => {
+                        console.log('object :>> ', open2.fieldMappings);
                         _.each(open2.fieldMappings, item => {
-                            if (item.sourceFieldName) {
-                                const target = _.find(open2.FR, ({ name }) => {
-                                    return _.camelCase(name) == _.camelCase(item.sourceFieldName)
+                            if (item.targetFieldName) {
+                                const target = _.find(open2.FL, ({ name }) => {
+                                    return _.camelCase(name) == _.camelCase(item.targetFieldName)
                                 });
                                 if (target) {
-                                    item.targetFieldName = target.name;
+                                    item.sourceFieldName = target.name;
                                 }
                             }
                         })
+                        setOpen2({ ...open2, fieldMappings: open2.fieldMappings })
                     }
                 })
             }} >智能匹配</Button>

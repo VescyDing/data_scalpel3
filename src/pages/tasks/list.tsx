@@ -21,7 +21,7 @@ import {
   ProFormDependency,
 } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col, Select, Typography } from 'antd';
+import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col, Select, Typography, Breadcrumb } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import { history } from '@umijs/max';
 import _ from 'lodash'
@@ -307,7 +307,7 @@ const TableList: React.FC = (props: { category?: string }) => {
   }
 
   return (
-    <PageContainer>
+    <PageContainer title='任务列表' breadcrumb={<Breadcrumb className='ant-page-header-breadcrumb' routes={[{ breadcrumbName: '数据汇聚' }, { breadcrumbName: '任务列表' }]} />}>
       <Layout style={{ minHeight: '100%' }}>
         <Layout.Sider width="25%" className='white-block' style={{ marginRight: '16px', paddingTop: '24px' }} >
           <SearchTree treeData={catalogsTree} onSelect={onSelect} />
