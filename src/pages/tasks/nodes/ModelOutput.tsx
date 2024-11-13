@@ -110,7 +110,7 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                                 onValuesChange={onValuesChange}
                             >
                                 <ProFormRadio.Group
-                                    name={['configuration', 'saveMode']}
+                                    name={['configuration', 'saveStrategy', 'saveMode']}
                                     label="更新方式"
                                     rules={[{ required: true }]}
                                     options={[
@@ -296,7 +296,6 @@ export default ({ data, menu, closeDrawer, callBack, deleteNode, getTables }) =>
                     title: '智能匹配',
                     content: '智能匹配将会遍历所有来源字段和目标字段，并将忽略大小写、空格、分隔符、驼峰等差异，进行对比，如果结果相等，将会自动为目标字段填入对应值。此操作将会覆盖之前所有已经做过的设置，所以请在最开始设置时使用此功能，是否继续？',
                     onOk: () => {
-                        console.log('object :>> ', open2.fieldMappings);
                         _.each(open2.fieldMappings, item => {
                             if (item.targetFieldName) {
                                 const target = _.find(open2.FL, ({ name }) => {

@@ -160,6 +160,34 @@ const dataSources = {
     });
   },
 }
+
+const dataFiles = {
+  get: async (
+    data?: { [key: string]: any },
+  ) => {
+    return listTransOut(await request(`${baseUrl}/data-files?${(new URLSearchParams(listTransIn(data ?? {}))).toString()}`, {
+      method: 'GET',
+    }));
+  },
+  put: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/data-files/${data.id}`, {
+      method: 'PUT',
+      data
+    });
+  },
+  post: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/data-files`, {
+      method: 'POST',
+      data
+    });
+  },
+  delete: async (data: { [key: string]: any }) => {
+    return request(`${baseUrl}/data-files/${data.id}`, {
+      method: 'DELETE',
+    });
+  },
+}
+
 const catalogs = {
   get: async (
     data?: { [key: string]: any },
@@ -299,6 +327,7 @@ export {
   dict,
   users,
   dataSources,
+  dataFiles,
   catalogs,
   models,
   tasks,
