@@ -73,10 +73,20 @@ export default [
     component: './models/list',
   },
   {
-    path: '/data-files/list',
+    path: '/data-files',
+    toPath: '/data-files/list',
     name: '文件管理',
     icon: 'folderOpen',
-    component: './data-files/list',
+    routes: [
+      {
+        path: 'list',
+        component: './data-files/list',
+      },
+      {
+        path: 'list/:id',
+        component: './data-files/detail',
+      },
+    ]
   },
   {
     path: '/tasks',

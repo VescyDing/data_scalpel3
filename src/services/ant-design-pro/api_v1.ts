@@ -186,6 +186,13 @@ const dataFiles = {
       method: 'DELETE',
     });
   },
+  detail: async (
+    data?: { [key: string]: any },
+  ) => {
+    return request(`${baseUrl}/data-files/${data.id}`, {
+      method: 'GET',
+    });
+  },
 }
 
 const catalogs = {
@@ -316,6 +323,12 @@ const tasks = {
   },
   preRun: async (data?: { [key: string]: any }) => {
     return request(`${baseUrl}/tasks/actions/canvas-pre-run`, {
+      method: 'POST',
+      data
+    });
+  },
+  runOnce: async (data?: { [key: string]: any }) => {
+    return request(`${baseUrl}/tasks/actions/run-once`, {
       method: 'POST',
       data
     });

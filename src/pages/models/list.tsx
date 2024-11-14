@@ -508,11 +508,6 @@ const TableList: React.FC = (props: { category?: string, targetItemDetail?: any,
         request={async () => await datasource}
       />
       <ProFormTextArea
-        rules={[
-          {
-            required: true,
-          },
-        ]}
         width="md"
         name="description"
         label="描述"

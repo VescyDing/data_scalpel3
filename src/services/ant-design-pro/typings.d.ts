@@ -36,6 +36,7 @@ declare namespace API {
 
   type RuleListItem = {
     key?: number;
+    id?: number;
     disabled?: boolean;
     href?: string;
     avatar?: string;

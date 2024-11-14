@@ -17,8 +17,9 @@ import {
   ProFormTreeSelect,
   ProFormList,
   EditableProTable,
+  ProFormUploadButton,
 } from '@ant-design/pro-components';
-import { FormattedMessage, useIntl } from '@umijs/max';
+import { FormattedMessage, useIntl, history } from '@umijs/max';
 import { Button, Drawer, Input, message, Tag, Switch, Modal, Layout, Row, Col, Select } from 'antd';
 import React, { useRef, useState, useEffect } from 'react';
 import _ from 'lodash'
@@ -79,18 +80,6 @@ const handleRemove = async (selectedRows: API.RuleListItem[]) => {
   }
 };
 
-const handleUpdateFields = async (fields: API.RuleListItem) => {
-  const hide = message.loading('正在更新字段');
-  try {
-    await dataFiles.updateFields(fields);
-    hide();
-    message.success('更新成功');
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
-
 const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (model: any) => void }) => {
   const { targetItemDetail, sendSelected } = props;
 
@@ -101,7 +90,6 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
    * @zh-CN 新建窗口的弹窗
    *  */
   const [createModalOpen, handleModalOpen] = useState<boolean>(false);
-  const [action_modal_1, _action_modal_1] = useState<boolean>(false);
 
   /**
    * @en-US The pop-up window of the distribution update window
@@ -121,6 +109,16 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
   const [columnType, _columnType] = useState({});
   const [currentEditFieldRow, _currentEditFieldRow] = useState({});
 
+  const type_status = {
+    'SHP': 'SHP',
+    'GDB': 'GDB',
+    'CSV': 'CSV',
+    'TXT': 'TXT',
+    'XLS': 'XLS',
+    'XLSX': 'XLSX',
+    'JSON': 'JSON',
+  }
+
   useEffect(() => {
     if (!createModalOpen) {
       setCurrentRow({});
@@ -137,7 +135,7 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
 
   useEffect(() => {
     catalogs.get({
-      type: '',
+      type: 'FILE',
       tree: true
     }).then((res) => {
       _catalogsTree(transTreeData(res.data) as [])
@@ -178,7 +176,10 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
     },
     {
       title: '类型',
-      dataIndex: 'type',
+      dataIndex: '**type',
+      render: (dom, entity) => <Tag>{type_status[entity.type] ?? entity?.type ?? '-'}</Tag>,
+      valueType: 'select',
+      valueEnum: type_status
     },
     {
       title: '创建时间',
@@ -200,6 +201,7 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
             type="link"
             key="detail"
             onClick={() => {
+              history.push(`list/${record.id}`)
             }}
           >
             <SearchOutlined /> 详情
@@ -208,85 +210,6 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
       },
     ]) as any,
   ];
-
-  const columns1: ProColumns<API.RuleListItem>[] = [
-    {
-      title: '字段(英文)',
-      dataIndex: 'name',
-    },
-    {
-      title: '字段名(中文)',
-      dataIndex: 'alias',
-    },
-    {
-      title: '备注',
-      dataIndex: 'description',
-    },
-    {
-      title: '类型',
-      dataIndex: 'type',
-      render: (dom, entity) => _.find(columnType, { value: dom })?.name ?? dom,
-      renderFormItem: ({ value, onChange }) => {
-        return <Select
-          options={_.map(columnType, item => ({ label: item.name, value: item.value, key: item.id, detail: item }))}
-          value={value}
-          onChange={(...args) => {
-            onChange?.(...args);
-            _currentEditFieldRow(args[1].detail)
-          }}
-          placeholder='请选择'
-        />
-      }
-    },
-    {
-      title: '长度',
-      dataIndex: 'precision',
-      valueType: 'digit',
-      fieldProps: {
-        disabled: currentEditFieldRow?.options?.supportPrecision == 'false',
-        min: currentEditFieldRow?.options?.minPrecision,
-        max: currentEditFieldRow?.options?.maxPrecision,
-      }
-    },
-    {
-      title: '精度',
-      dataIndex: 'scale',
-      valueType: 'digit',
-      fieldProps: {
-        disabled: currentEditFieldRow?.options?.supportScale == 'false',
-        min: currentEditFieldRow?.options?.minScale,
-        max: currentEditFieldRow?.options?.maxScale,
-      }
-    },
-    {
-      title: '操作',
-      valueType: 'option',
-      width: 200,
-      render: (text, record, _, action) => [
-        <a
-          key="editable"
-          onClick={() => {
-            action?.startEditable?.(record.index);
-          }}
-        >
-          编辑
-        </a>,
-        <a
-          key="delete"
-          style={{
-            color: 'red',
-          }}
-          onClick={() => {
-            setDataSource(dataSource.filter((item) => item.index !== record.index));
-          }}
-        >
-          删除
-        </a>,
-      ],
-    },
-  ]
-
-  const [dataSource, setDataSource] = useState([]);
 
   const detail_columns: ProColumns<API.RuleListItem>[] = []
 
@@ -368,7 +291,7 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
       </FooterToolbar>
     )}
     <ModalForm
-      title={(currentRow?.id ? '编辑' : '新建') + '模型'}
+      title={(currentRow?.id ? '编辑' : '上传') + '文件'}
       width="400px"
       open={createModalOpen}
       onOpenChange={handleModalOpen}
@@ -379,10 +302,20 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
       onFinish={async (value) => {
         let success;
         const { id } = currentRow;
+        // 创建 FormData 对象
+        const formData = new FormData();
+        formData.append('file', value.file?.[0]?.originFileObj);
+        formData.append('name', value.name);
+        formData.append('alias', value.alias);
+        formData.append('type', value.type);
+        formData.append('catalogId', value.catalogId);
+        value.description && formData.append('description', value.description);
+        value.options && formData.append('options', value.options);
         if (id) {
-          success = await handleUpdate({ id, ...value, } as API.RuleListItem);
+          formData.append('id', value.id);
+          success = await handleUpdate(formData as API.RuleListItem);
         } else {
-          success = await handleAdd({ ...value, } as API.RuleListItem);
+          success = await handleAdd(formData as API.RuleListItem);
         }
         if (success) {
           handleModalOpen(false);
@@ -412,6 +345,13 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
         name="alias"
         label="别名"
       />
+      <ProFormSelect
+        name="type"
+        width="md"
+        label="类型"
+        rules={[{ required: true }]}
+        valueEnum={type_status}
+      />
       <ProFormTreeSelect
         name='catalogId'
         width="md"
@@ -423,73 +363,23 @@ const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (mo
         ]}
         request={async () => await catalogsTree}
       />
-      <ProFormSelect
-        name='datasourceId'
-        width="md"
-        label="存储"
-        showSearch
-        rules={[
-          {
-            required: true,
-          },
-        ]}
-        request={async () => await datasource}
-      />
-      <ProFormTextArea
-        rules={[
-          {
-            required: true,
-          },
-        ]}
+      <ProFormText
         width="md"
         name="description"
         label="描述"
       />
-    </ModalForm>
-    <ModalForm
-      title={'编辑模型字段'}
-      width="1200px"
-      open={action_modal_1}
-      onOpenChange={_action_modal_1}
-      modalProps={{
-        destroyOnClose: true,
-      }}
-      initialValues={currentRow}
-      onFinish={async (value) => {
-        let success;
-        const { id } = currentRow;
-        success = await handleUpdateFields({ id, fields: dataSource, } as API.RuleListItem);
-        if (success) {
-          _action_modal_1(false);
-          if (actionRef.current) {
-            actionRef.current.reload();
-          }
-        }
-      }}
-    >
-      <EditableProTable
-        rowKey="index"
-        scroll={{
-          y: 400,
-        }}
-        recordCreatorProps={{
-          position: 'bottom',
-          record: () => ({ index: dataSource.length }),
-        }}
-        loading={false}
-        columns={columns1}
-        request={async () => ({
-          data: currentRow.fields,
-          total: currentRow.fields?.length ?? 0,
-          success: true,
-        })}
-        value={dataSource}
-        onChange={setDataSource}
-        editable={{
-          type: 'multiple',
-          onSave: async (rowKey, data, row) => {
-          },
-        }}
+      <ProFormTextArea
+        width="md"
+        name="options"
+        label="选项"
+      />
+      {/* TODO: 如果有编辑回显，这块未做 */}
+      <ProFormUploadButton
+        style={{ width: '100%' }}
+        name="file"
+        label="文件上传"
+        rules={[{ required: true, message: '请上传文件' }]}
+        max={1}
       />
     </ModalForm>
     <Drawer

@@ -1,5 +1,5 @@
 import { tasks, catalogs, dict } from '@/services/ant-design-pro/api_v1';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ClockCircleOutlined, SyncOutlined, MinusCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, PlayCircleOutlined, HistoryOutlined, FieldTimeOutlined, StopOutlined, BranchesOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ClockCircleOutlined, SyncOutlined, MinusCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, PlayCircleOutlined, HistoryOutlined, FieldTimeOutlined, StopOutlined, BranchesOutlined, PlaySquareOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
@@ -229,7 +229,6 @@ const TableList: React.FC = (props: { category?: string }) => {
     {
       title: '统计',
       dataIndex: 'successCount',
-      width: 100,
       search: false,
       render: (dom, entity) => <div><Text type="success">{entity?.successCount}</Text>/<Text type="danger">{entity?.failureCount}</Text></div>,
     },
@@ -245,16 +244,16 @@ const TableList: React.FC = (props: { category?: string }) => {
       title: '更新时间',
       dataIndex: 'lastModifiedDate',
       valueType: 'dateTime',
-      width: 130,
       search: false,
     },
     {
       title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
       dataIndex: 'option',
       valueType: 'option',
-      width: 300,
+      width: 265,
       render: (_, record) => [
         <Button
+          className='no-padding-button'
           type="link"
           key="edit"
           onClick={() => {
@@ -265,6 +264,7 @@ const TableList: React.FC = (props: { category?: string }) => {
           <EditOutlined /> 编辑
         </Button>,
         <Button
+          className='no-padding-button'
           type="link"
           key="canvas"
           onClick={() => {
@@ -280,6 +280,20 @@ const TableList: React.FC = (props: { category?: string }) => {
           }}
         >
           <BranchesOutlined /> 配置
+        </Button>,
+        <Button
+          className='no-padding-button'
+          type="link"
+          key="run"
+          onClick={async () => {
+            setCurrentRow(record);
+            const res = await tasks.runOnce({ id: record.id });
+            if (res?.code == '200') {
+              message.success('发起运行成功');
+            }
+          }}
+        >
+          <PlaySquareOutlined /> 运行
         </Button>,
         <Switch key="switch" checkedChildren="启用" unCheckedChildren="禁用" checked={record.status === 'ENABLE'} onChange={async v => {
           const { id } = record;
