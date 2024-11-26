@@ -23,14 +23,11 @@ import _ from 'lodash'
  */
 const handleAdd = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在添加');
-  try {
-    await roles.post(fields);
-    hide();
-    message.success('添加成功');
-    return true;
-  } catch (error) {
-    return false;
-  }
+  const res = await roles.post(fields);
+  hide();
+  const success = res.code == '200';
+  success && message.success('添加成功');
+  return success;
 };
 
 /**
@@ -41,14 +38,11 @@ const handleAdd = async (fields: API.RuleListItem) => {
  */
 const handleUpdate = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在更新');
-  try {
-    await roles.put(fields);
-    hide();
-    message.success('更新成功');
-    return true;
-  } catch (error) {
-    return false;
-  }
+  const res = await roles.put(fields);
+  hide();
+  const success = res.code == '200';
+  success && message.success('更新成功');
+  return success;
 };
 
 /**
@@ -58,17 +52,14 @@ const handleUpdate = async (fields: API.RuleListItem) => {
  * @param selectedRows
  */
 const handleRemove = async (selectedRows: API.RuleListItem[]) => {
-  const hide = message.loading('正在删除');
   if (!selectedRows) return true;
-  try {
-    const requests = selectedRows.map(({ id }) => roles.delete({ id }))
-    await Promise.all(requests)
-    hide();
-    message.success('删除成功');
-    return true;
-  } catch (error) {
-    return false;
-  }
+  const hide = message.loading('正在删除');
+  const requests = selectedRows.map(({ id }) => roles.delete({ id }))
+  const res = await Promise.all(requests)
+  hide();
+  const success = res[0].code == '200';
+  success && message.success('删除成功');
+  return success;
 };
 
 const TableList: React.FC = () => {

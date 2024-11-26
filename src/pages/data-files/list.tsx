@@ -32,14 +32,11 @@ import SearchTree from '@/components/SearchTree';
  */
 const handleAdd = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在添加');
-  try {
-    await dataFiles.post(fields);
-    hide();
-    message.success('添加成功');
-    return true;
-  } catch (error) {
-    return false;
-  }
+  const res = await dataFiles.post(fields);
+  hide();
+  const success = res.code == '200';
+  success && message.success('添加成功');
+  return success;
 };
 
 /**
@@ -50,14 +47,11 @@ const handleAdd = async (fields: API.RuleListItem) => {
  */
 const handleUpdate = async (fields: API.RuleListItem) => {
   const hide = message.loading('正在更新');
-  try {
-    await dataFiles.put(fields);
-    hide();
-    message.success('更新成功');
-    return true;
-  } catch (error) {
-    return false;
-  }
+  const res = await dataFiles.put(fields);
+  hide();
+  const success = res.code == '200';
+  success && message.success('更新成功');
+  return success;
 };
 
 /**
@@ -68,16 +62,12 @@ const handleUpdate = async (fields: API.RuleListItem) => {
  */
 const handleRemove = async (selectedRows: API.RuleListItem[]) => {
   const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    const requests = selectedRows.map(({ id }) => dataFiles.delete({ id }))
-    await Promise.all(requests)
-    hide();
-    message.success('删除成功');
-    return true;
-  } catch (error) {
-    return false;
-  }
+  const requests = selectedRows.map(({ id }) => dataFiles.delete({ id }))
+  const res = await Promise.all(requests)
+  hide();
+  const success = res[0].code == '200';
+  success && message.success('删除成功');
+  return success;
 };
 
 const TableList: React.FC = (props: { targetItemDetail?: any, sendSelected?: (model: any) => void }) => {
